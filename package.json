@@ -1,0 +1,35 @@
+{
+  "name": "green-licenses",
+  "version": "0.1.0",
+  "description": "NPM package license checker",
+  "main": "build/src/cli.js",
+  "bin": "build/src/cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "fix": "gts fix",
+    "start": "node build/src/cli.js",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run check"
+  },
+  "keywords": [],
+  "author": "Google LLC",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/argparse": "^1.0.33",
+    "@types/node": "^8.0.52",
+    "@types/npm-package-arg": "^5.1.0",
+    "gts": "^0.5.1",
+    "typescript": "~2.6.1"
+  },
+  "dependencies": {
+    "argparse": "^1.0.9",
+    "npm-package-arg": "^6.0.0",
+    "package-json": "^4.0.1",
+    "spdx-correct": "^2.0.4",
+    "spdx-satisfies": "^0.1.3"
+  }
+}
