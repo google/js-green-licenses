@@ -6,7 +6,7 @@ declare module 'package-json' {
     allVersions?: boolean;
   }
 
-  function packageJson(name: string, options?: PackageJsonOptions): {};
+  function packageJson(name: string, options?: PackageJsonOptions): Promise<{}>;
 
   export = packageJson;
 }
