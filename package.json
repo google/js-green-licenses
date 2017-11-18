@@ -2,7 +2,7 @@
   "name": "green-licenses",
   "version": "0.1.0",
   "description": "NPM package license checker",
-  "main": "build/src/cli.js",
+  "main": "build/src/checker.js",
   "bin": "build/src/cli.js",
   "scripts": {
     "test": "ava build/test/*-test.js",

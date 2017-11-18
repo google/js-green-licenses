@@ -40,12 +40,19 @@ export class LicenseChecker extends EventEmitter {
   }
 
   on(event: 'non-green-license',
-     listener: (arg: NonGreenLicense) => void): this {
+     listener: (arg: NonGreenLicense) => void): this;
+  on(event: 'end', listener: () => void): this;
+  // tslint:disable:no-any The parent `EventEmitter` uses ...args: any[]
+  on(event: 'non-green-license'|'end',
+     listener: ((...args: any[]) => void)): this {
     return super.on(event, listener);
   }
+  // tsline:enable
 
-  emit(event: 'non-green-license', arg: NonGreenLicense): boolean {
-    return super.emit(event, arg);
+  emit(event: 'non-green-license', arg: NonGreenLicense): boolean;
+  emit(event: 'end'): boolean;
+  emit(event: 'non-green-license'|'end', arg?: NonGreenLicense): boolean {
+    return arg ? super.emit(event, arg) : super.emit(event);
   }
 
   private reset(): void {
@@ -152,7 +159,7 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
-  checkRemotePackage(pkg: string): Promise<void> {
+  async checkRemotePackage(pkg: string): Promise<void> {
     this.reset();
     const pkgArgs = npmPackageArg(pkg);
     const pkgType = pkgArgs.type;
@@ -162,6 +169,7 @@ export class LicenseChecker extends EventEmitter {
     if (!pkgArgs.name || !pkgArgs.fetchSpec) {
       throw new Error(`Invalid package spec: ${pkg}`);
     }
-    return this.checkLicenses(pkgArgs.name, pkgArgs.fetchSpec);
+    await this.checkLicenses(pkgArgs.name, pkgArgs.fetchSpec);
+    this.emit('end');
   }
 }
