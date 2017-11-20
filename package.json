@@ -4,6 +4,7 @@
   "description": "NPM package license checker",
   "main": "build/src/checker.js",
   "bin": "build/src/cli.js",
+  "types": "build/src/checker",
   "scripts": {
     "test": "ava build/test/*-test.js",
     "check": "gts check",

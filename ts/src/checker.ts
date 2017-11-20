@@ -26,6 +26,8 @@ export interface NonGreenLicense {
   parentPackages: string[];
 }
 
+type EventType = 'non-green-license'|'end'|'error';
+
 // TODO(jinwoo): write tests for this class
 export class LicenseChecker extends EventEmitter {
   // Cache for packageName@version's that are already processed.
@@ -42,16 +44,17 @@ export class LicenseChecker extends EventEmitter {
   on(event: 'non-green-license',
      listener: (arg: NonGreenLicense) => void): this;
   on(event: 'end', listener: () => void): this;
+  on(event: 'error', listener: (err: Error) => void): this;
   // tslint:disable:no-any The parent `EventEmitter` uses ...args: any[]
-  on(event: 'non-green-license'|'end',
-     listener: ((...args: any[]) => void)): this {
+  on(event: EventType, listener: ((...args: any[]) => void)): this {
     return super.on(event, listener);
   }
   // tsline:enable
 
   emit(event: 'non-green-license', arg: NonGreenLicense): boolean;
   emit(event: 'end'): boolean;
-  emit(event: 'non-green-license'|'end', arg?: NonGreenLicense): boolean {
+  emit(event: 'error', err: Error): boolean;
+  emit(event: EventType, arg?: NonGreenLicense|Error): boolean {
     return arg ? super.emit(event, arg) : super.emit(event);
   }
 
@@ -112,8 +115,8 @@ export class LicenseChecker extends EventEmitter {
       json = ensurePackageJson(await packageJson(
           packageName, {version: versionSpec, fullMetadata: true}));
     } catch (err) {
-      console.error(`got error for ${spec}:`, err);
       this.failedPackages.add(spec);
+      this.emit('error', err);
       return;
     }
     const pkgVersion = json.version;

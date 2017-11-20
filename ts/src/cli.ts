@@ -35,15 +35,16 @@ const args = argParser.parseArgs();
 function main() {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
-  checker.on(
-      'non-green-license',
-      ({packageName, version, licenseName, parentPackages}) => {
-        const licenseDisplay = licenseName || '(no license)';
-        const packageAndVersion = `${packageName}@${version}`;
-        process.stdout.write(`${licenseDisplay}: ${packageAndVersion}\n`);
-        process.stdout.write(
-            `  ${[...parentPackages, packageAndVersion].join(' -> ')}\n\n`);
-      });
+  checker
+      .on('non-green-license',
+          ({packageName, version, licenseName, parentPackages}) => {
+            const licenseDisplay = licenseName || '(no license)';
+            const packageAndVersion = `${packageName}@${version}`;
+            process.stdout.write(`${licenseDisplay}: ${packageAndVersion}\n`);
+            process.stdout.write(
+                `  ${[...parentPackages, packageAndVersion].join(' -> ')}\n\n`);
+          })
+      .on('error', err => console.error(err));
   if (args.file) {
     checker.checkLocalPackageJson(args.file[0]);
   } else if (args.package) {
