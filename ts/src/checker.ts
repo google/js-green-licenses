@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as npmPackageArg from 'npm-package-arg';
 import {promisify} from 'util';
 
+import {GitHubRepository} from './github';
 import {GREEN_LICENSE_EXPR, WHITELISTED_LICENSES} from './licenses';
 import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file';
 
@@ -26,9 +27,8 @@ export interface NonGreenLicense {
   parentPackages: string[];
 }
 
-type EventType = 'non-green-license'|'end'|'error';
+type EventType = 'non-green-license'|'package.json'|'end'|'error';
 
-// TODO(jinwoo): write tests for this class
 export class LicenseChecker extends EventEmitter {
   // Cache for packageName@version's that are already processed.
   private readonly processedPackages: Set<string> = new Set();
@@ -43,19 +43,22 @@ export class LicenseChecker extends EventEmitter {
 
   on(event: 'non-green-license',
      listener: (arg: NonGreenLicense) => void): this;
+  // 'package.json' events are emitted only for github PR checkings.
+  on(event: 'package.json', listener: (filePath: string) => void): this;
   on(event: 'end', listener: () => void): this;
   on(event: 'error', listener: (err: Error) => void): this;
-  // tslint:disable:no-any The parent `EventEmitter` uses ...args: any[]
-  on(event: EventType, listener: ((...args: any[]) => void)): this {
+  // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
+  on(event: EventType, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }
-  // tsline:enable
 
   emit(event: 'non-green-license', arg: NonGreenLicense): boolean;
+  emit(event: 'package.json', filePath: string): boolean;
   emit(event: 'end'): boolean;
   emit(event: 'error', err: Error): boolean;
-  emit(event: EventType, arg?: NonGreenLicense|Error): boolean {
-    return arg ? super.emit(event, arg) : super.emit(event);
+  // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
+  emit(event: EventType, ...args: any[]): boolean {
+    return super.emit(event, ...args);
   }
 
   private reset(): void {
@@ -151,15 +154,20 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
-  async checkLocalPackageJson(packageJsonFile: string): Promise<void> {
-    this.reset();
-    const content = await fsReadFile(packageJsonFile, 'utf8');
+  private async checkPackageJsonContent(content: string): Promise<void> {
     const json: PackageJson = ensurePackageJson(JSON.parse(content));
     const packageAndVersion = `${json.name}@${json.version}`;
     await this.checkLicensesForDeps(json.dependencies, packageAndVersion);
     if (this.opts.dev) {
       await this.checkLicensesForDeps(json.devDependencies, packageAndVersion);
     }
+  }
+
+  async checkLocalPackageJson(packageJsonFile: string): Promise<void> {
+    this.reset();
+    const content = await fsReadFile(packageJsonFile, 'utf8');
+    await this.checkPackageJsonContent(content);
+    this.emit('end');
   }
 
   async checkRemotePackage(pkg: string): Promise<void> {
@@ -173,6 +181,31 @@ export class LicenseChecker extends EventEmitter {
       throw new Error(`Invalid package spec: ${pkg}`);
     }
     await this.checkLicenses(pkgArgs.name, pkgArgs.fetchSpec);
+    this.emit('end');
+  }
+
+  /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
+  async checkGithubPR(prPath: string): Promise<void> {
+    const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
+    const matched = regexp.exec(prPath);
+    if (!matched) {
+      throw new Error(
+          `Invalid github path: ${prPath}. ` +
+          'Must be in the form <owner>/<repo>/pull/<id>.');
+    }
+    const owner = matched[1];
+    const repoName = matched[2];
+    const id = Number(matched[3]);
+    const repo = new GitHubRepository(owner, repoName);
+    const mergeCommit = await repo.getPRMergeCommit(id);
+    const packageJsons = await repo.getPackageJsonFiles(mergeCommit);
+    if (packageJsons.length === 0) {
+      console.log('No package.json files have been found.');
+    }
+    for (const pj of packageJsons) {
+      this.emit('package.json', pj.filePath);
+      await this.checkPackageJsonContent(pj.content);
+    }
     this.emit('end');
   }
 }

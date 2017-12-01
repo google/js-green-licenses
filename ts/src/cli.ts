@@ -22,6 +22,12 @@ argParser.addArgument(['--file', '-f'], {
   type: 'string',
   nargs: 1,
 });
+argParser.addArgument(['--pr'], {
+  help: 'Check a github pull request. Must be <owner>/<repo>/pull/<id>',
+  metavar: '<github PR>',
+  type: 'string',
+  nargs: 1,
+});
 argParser.addArgument(['--dev'], {
   help: 'Also check devDependencies.',
   nargs: 0,
@@ -32,26 +38,43 @@ argParser.addArgument(['--verbose'], {
 });
 const args = argParser.parseArgs();
 
-function main() {
+function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
+  let nonGreenCount = 0;
   checker
       .on('non-green-license',
           ({packageName, version, licenseName, parentPackages}) => {
+            nonGreenCount++;
             const licenseDisplay = licenseName || '(no license)';
             const packageAndVersion = `${packageName}@${version}`;
             process.stdout.write(`${licenseDisplay}: ${packageAndVersion}\n`);
             process.stdout.write(
                 `  ${[...parentPackages, packageAndVersion].join(' -> ')}\n\n`);
           })
-      .on('error', err => console.error(err));
+      .on('package.json',
+          (filePath) => {
+            process.stdout.write(`Checking ${filePath}...\n`);
+          })
+      .on('error', err => console.error(err))
+      .on('end', () => {
+        if (nonGreenCount > 0) {
+          process.stdout.write(`${nonGreenCount} non-green licenses found.\n`);
+        } else {
+          process.stdout.write('All green!\n');
+        }
+      });
   if (args.file) {
-    checker.checkLocalPackageJson(args.file[0]);
+    return checker.checkLocalPackageJson(args.file[0]);
+  } else if (args.pr) {
+    return checker.checkGithubPR(args.pr[0]);
   } else if (args.package) {
-    checker.checkRemotePackage(args.package);
+    return checker.checkRemotePackage(args.package);
   } else {
-    throw new Error('Package name or --file must be given');
+    throw new Error('Package name, --file, or --pr must be given');
   }
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+});
