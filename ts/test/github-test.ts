@@ -32,25 +32,91 @@ test.afterEach.always('cleanup', (t) => {
 // NOTE: Tests must be run serially so that nock interceptions in each test
 // don't interfere with other tests.
 
-test.serial('should correctly get PR merge commit sha', async (t) => {
+test.serial('should correctly get PR commit SHAs', async (t) => {
   const scope = nock('https://api.github.com')
                     .get('/repos/luke/star-destroyer/pulls/12345')
                     .reply(200, {
+                      mergeable: true,
                       merge_commit_sha: 'deadbeef',
+                      head: {sha: 'foobar'},
                     });
-  const sha = await t.context.repo.getPRMergeCommit(12345);
+  const {mergeCommitSha, headCommitSha} =
+      await t.context.repo.getPRCommits(12345);
   scope.done();
-  t.is(sha, 'deadbeef');
+  t.is(mergeCommitSha, 'deadbeef');
+  t.is(headCommitSha, 'foobar');
+});
+
+test.serial('should retry when unknown whether PR is mergeable', async (t) => {
+  const firstScope = nock('https://api.github.com')
+                         .get('/repos/luke/star-destroyer/pulls/12345')
+                         .reply(200, {
+                           mergeable: null,
+                         });
+  const retryScope = nock('https://api.github.com')
+                         .get('/repos/luke/star-destroyer/pulls/12345')
+                         .reply(200, {
+                           mergeable: true,
+                           merge_commit_sha: 'deadbeef',
+                           head: {sha: 'foobar'},
+                         });
+  const {mergeCommitSha, headCommitSha} =
+      await t.context.repo.getPRCommits(12345);
+  firstScope.done();
+  retryScope.done();
+  t.is(mergeCommitSha, 'deadbeef');
+  t.is(headCommitSha, 'foobar');
+});
+
+test.serial('should throw on max retries', async (t) => {
+  const scope = nock('https://api.github.com')
+                    .get('/repos/luke/star-destroyer/pulls/12345')
+                    .reply(200, {
+                      mergeable: null,
+                    });
+  // Currently gives up after 10 retries (i.e. 11 tries total).
+  const err: Error = await t.throws(t.context.repo.getPRCommits(12345, 11));
+  scope.done();
+  t.is(
+      err.message,
+      'Tried 11 times but the mergeable field is not set. Giving up');
+});
+
+test.serial('should throw when PR is not mergeable', async (t) => {
+  const scope = nock('https://api.github.com')
+                    .get('/repos/luke/star-destroyer/pulls/12345')
+                    .reply(200, {
+                      mergeable: false,
+                      merge_commit_sha: 'deadbeef',
+                      head: {sha: 'foobar'},
+                    });
+  const err: Error = await t.throws(t.context.repo.getPRCommits(12345), Error);
+  scope.done();
+  t.is(err.message, 'PR is not mergeable');
 });
 
 test.serial('should throw when PR merge commit sha is not found', async (t) => {
   const scope = nock('https://api.github.com')
                     .get('/repos/luke/star-destroyer/pulls/12345')
-                    .reply(200);
-  const err: Error =
-      await t.throws(t.context.repo.getPRMergeCommit(12345), Error);
+                    .reply(200, {
+                      mergeable: true,
+                      head: {sha: 'foobar'},
+                    });
+  const err: Error = await t.throws(t.context.repo.getPRCommits(12345), Error);
   scope.done();
   t.is(err.message, 'Merge commit SHA is not found');
+});
+
+test.serial('should throw when PR HEAD commit sha is not found', async (t) => {
+  const scope = nock('https://api.github.com')
+                    .get('/repos/luke/star-destroyer/pulls/12345')
+                    .reply(200, {
+                      mergeable: true,
+                      merge_commit_sha: 'deadbeef',
+                    });
+  const err: Error = await t.throws(t.context.repo.getPRCommits(12345), Error);
+  scope.done();
+  t.is(err.message, 'HEAD commit SHA is not found');
 });
 
 test.serial('should retrieve package.json from a single repo', async (t) => {

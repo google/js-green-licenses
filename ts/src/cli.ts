@@ -15,6 +15,7 @@
 // limitations under the License.
 
 import {ArgumentParser} from 'argparse';
+import {inspect} from 'util';
 
 import {LicenseChecker, NonGreenLicense} from './checker';
 
@@ -52,7 +53,7 @@ argParser.addArgument(['--verbose'], {
 });
 const args = argParser.parseArgs();
 
-function main(): Promise<void> {
+async function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
   let nonGreenCount = 0;
@@ -62,28 +63,41 @@ function main(): Promise<void> {
             nonGreenCount++;
             const licenseDisplay = licenseName || '(no license)';
             const packageAndVersion = `${packageName}@${version}`;
-            process.stdout.write(`${licenseDisplay}: ${packageAndVersion}\n`);
-            process.stdout.write(
-                `  ${[...parentPackages, packageAndVersion].join(' -> ')}\n\n`);
+            console.log(`${licenseDisplay}: ${packageAndVersion}`);
+            console.log(
+                `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
+            console.log();
           })
       .on('package.json',
           (filePath) => {
-            process.stdout.write(`Checking ${filePath}...\n`);
+            console.log(`Checking ${filePath}...`);
+            console.log();
           })
-      .on('error', err => console.error(err))
+      .on('error',
+          ({err, packageName, versionSpec, parentPackages}) => {
+            const packageAndVersion = `${packageName}@${versionSpec}`;
+            console.log(`Error while checking ${packageAndVersion}:`);
+            console.log(
+                `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
+            console.log();
+            console.log(`${inspect(err)}`);
+            console.log();
+          })
       .on('end', () => {
         if (nonGreenCount > 0) {
-          process.stdout.write(`${nonGreenCount} non-green licenses found.\n`);
+          console.log(`${nonGreenCount} non-green licenses found.`);
         } else {
-          process.stdout.write('All green!\n');
+          console.log('All green!');
         }
       });
   if (args.file) {
-    return checker.checkLocalPackageJson(args.file[0]);
+    await checker.checkLocalPackageJson(args.file[0]);
   } else if (args.pr) {
-    return checker.checkGithubPR(args.pr[0]);
+    const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
+    const {mergeCommitSha} = await repo.getPRCommits(prId);
+    await checker.checkGithubPR(repo, mergeCommitSha);
   } else if (args.package) {
-    return checker.checkRemotePackage(args.package);
+    await checker.checkRemotePackage(args.package);
   } else {
     throw new Error('Package name, --file, or --pr must be given');
   }

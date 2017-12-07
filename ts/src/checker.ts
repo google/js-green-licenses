@@ -41,6 +41,14 @@ export interface NonGreenLicense {
   parentPackages: string[];
 }
 
+// argument for 'error' event from LicenseChecker
+export interface CheckError {
+  err: Error;
+  packageName: string;
+  versionSpec: string;
+  parentPackages: string[];
+}
+
 type EventType = 'non-green-license'|'package.json'|'end'|'error';
 
 export class LicenseChecker extends EventEmitter {
@@ -60,7 +68,7 @@ export class LicenseChecker extends EventEmitter {
   // 'package.json' events are emitted only for github PR checkings.
   on(event: 'package.json', listener: (filePath: string) => void): this;
   on(event: 'end', listener: () => void): this;
-  on(event: 'error', listener: (err: Error) => void): this;
+  on(event: 'error', listener: (checkError: CheckError) => void): this;
   // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
   on(event: EventType, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
@@ -69,7 +77,7 @@ export class LicenseChecker extends EventEmitter {
   emit(event: 'non-green-license', arg: NonGreenLicense): boolean;
   emit(event: 'package.json', filePath: string): boolean;
   emit(event: 'end'): boolean;
-  emit(event: 'error', err: Error): boolean;
+  emit(event: 'error', checkError: CheckError): boolean;
   // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
   emit(event: EventType, ...args: any[]): boolean {
     return super.emit(event, ...args);
@@ -133,7 +141,12 @@ export class LicenseChecker extends EventEmitter {
           packageName, {version: versionSpec, fullMetadata: true}));
     } catch (err) {
       this.failedPackages.add(spec);
-      this.emit('error', err);
+      this.emit('error', {
+        err,
+        packageName,
+        versionSpec,
+        parentPackages: parents,
+      });
       return;
     }
     const pkgVersion = json.version;
@@ -199,20 +212,22 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
-  async checkGithubPR(prPath: string): Promise<void> {
+  prPathToGitHubRepoAndId(prPath: string):
+      {repo: GitHubRepository; prId: number;} {
     const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
     const matched = regexp.exec(prPath);
     if (!matched) {
       throw new Error(
-          `Invalid github path: ${prPath}. ` +
+          `Invalid github pull request path: ${prPath}. ` +
           'Must be in the form <owner>/<repo>/pull/<id>.');
     }
-    const owner = matched[1];
-    const repoName = matched[2];
-    const id = Number(matched[3]);
-    const repo = new GitHubRepository(owner, repoName);
-    const mergeCommit = await repo.getPRMergeCommit(id);
-    const packageJsons = await repo.getPackageJsonFiles(mergeCommit);
+    const [, owner, repoName, prId] = matched;
+    return {repo: new GitHubRepository(owner, repoName), prId: Number(prId)};
+  }
+
+  async checkGithubPR(repo: GitHubRepository, mergeCommitSha: string):
+      Promise<void> {
+    const packageJsons = await repo.getPackageJsonFiles(mergeCommitSha);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');
     }

@@ -48,9 +48,9 @@ proxyquire('../src/checker', {
       },
 });
 
-const requestedPackages: string[] = [];
-
 import {LicenseChecker} from '../src/checker';
+
+const requestedPackages: string[] = [];
 
 test(
     'correct packages are requested and non-green-license is emitted',

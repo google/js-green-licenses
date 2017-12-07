@@ -16,16 +16,26 @@
 // see https://developer.github.com/v3/.
 
 import axios from 'axios';
+import {AxiosRequestConfig} from 'axios';
 import {posix as posixPath} from 'path';
 import {URL, URLSearchParams} from 'url';
 
 interface SingleResponseData {
   content?: string;
+  mergeable?: boolean|null;
   merge_commit_sha?: string;
   name?: string;
   type?: string;
+  head?: {sha?: string};
 }
 type ResponseData = SingleResponseData|SingleResponseData[];
+
+export interface PRCommits {
+  mergeCommitSha: string;  // commit sha to be used for merge
+  headCommitSha: string;
+}
+
+export type CommitStatus = 'error'|'failure'|'pending'|'success';
 
 function isSingleResponseData(respData: ResponseData):
     respData is SingleResponseData {
@@ -40,7 +50,7 @@ function ensureSingleResponseData(respData: ResponseData): SingleResponseData {
 }
 
 interface QueryParams {
-  [key: string]: string|string[];
+  [key: string]: string;
 }
 
 export interface PackageJsonFile {
@@ -50,37 +60,84 @@ export interface PackageJsonFile {
 
 export class GitHubRepository {
   private readonly pathPrefix: string;
+  // How many times to retry PR commit retrieval until giving up.
+  private static MAX_PR_COMMIT_RETRIES = 10;
 
   constructor(owner: string, repo: string) {
     this.pathPrefix = posixPath.join('/repos', owner, repo);
   }
 
-  private async api(path: string, params?: QueryParams): Promise<ResponseData> {
+  private getAxiosConfig(authToken?: string): AxiosRequestConfig {
+    return authToken ? {headers: {'Authorization': `token ${authToken}`}} : {};
+  }
+
+  private async apiGet(path: string, params?: QueryParams):
+      Promise<ResponseData> {
     const url = new URL('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
     if (params) {
       const searchParams = new URLSearchParams(params);
       url.search = searchParams.toString();
     }
-    const resp = await axios.get(url.toString());
+    const resp = await axios.get(url.toString(), this.getAxiosConfig());
     return resp.data;
   }
 
-  async getPRMergeCommit(prId: number): Promise<string> {
-    let answer = await this.api(posixPath.join('pulls', prId.toString()));
+  private async apiPost(path: string, body?: {}): Promise<ResponseData> {
+    const url = new URL('https://api.github.com');
+    url.pathname = posixPath.join(this.pathPrefix, path);
+    const resp = await axios.post(url.toString(), body, this.getAxiosConfig());
+    return resp.data;
+  }
+
+  async getPRCommits(prId: number, attemptCount = 1): Promise<PRCommits> {
+    let answer = await this.apiGet(posixPath.join('pulls', prId.toString()));
     answer = ensureSingleResponseData(answer);
-    const mergeCommit = answer.merge_commit_sha;
-    if (!mergeCommit) {
+    if (answer.mergeable == null) {
+      if (attemptCount > GitHubRepository.MAX_PR_COMMIT_RETRIES) {
+        throw new Error(`Tried ${
+            attemptCount} times but the mergeable field is not set. Giving up`);
+      }
+      console.log('The `mergeable` field is not set yet. Will retry later.');
+      return new Promise<PRCommits>((resolve) => {
+        setTimeout(async () => {
+          resolve(await this.getPRCommits(prId, attemptCount + 1));
+        }, 1000);
+      });
+    } else if (!answer.mergeable) {
+      throw new Error('PR is not mergeable');
+    }
+    const mergeCommitSha = answer.merge_commit_sha;
+    if (!mergeCommitSha) {
       throw new Error('Merge commit SHA is not found');
     }
-    return mergeCommit;
+    const headCommitSha = answer.head && answer.head.sha;
+    if (!headCommitSha) {
+      throw new Error('HEAD commit SHA is not found');
+    }
+    return {mergeCommitSha, headCommitSha};
+  }
+
+  async createPRReview(prId: number, commitSha: string, body: string):
+      Promise<void> {
+    await this.apiPost(
+        posixPath.join('pulls', prId.toString(), 'reviews'),
+        {commit_id: commitSha, body, event: 'COMMENT'});
+  }
+
+  async setCommitStatus(
+      commitSha: string, status: CommitStatus, description: string,
+      context?: string): Promise<void> {
+    await this.apiPost(
+        posixPath.join('statuses', commitSha),
+        {state: status, description, context});
   }
 
   private async getSinglePackageJson(dir: string, commitSha: string):
       Promise<PackageJsonFile|null> {
     let answer: ResponseData;
     try {
-      answer = await this.api(
+      answer = await this.apiGet(
           posixPath.join('contents', dir, 'package.json'), {ref: commitSha});
     } catch {
       return null;
@@ -106,7 +163,7 @@ export class GitHubRepository {
     // Find `packages/<name>/package.json` files in case this is a monorepo.
     let answer: ResponseData;
     try {
-      answer = await this.api('contents/packages', {ref: commitSha});
+      answer = await this.apiGet('contents/packages', {ref: commitSha});
     } catch {
       // Not a monorepo. Return just the top-level package.json.
       return packageJsons;
