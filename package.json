@@ -1,7 +1,7 @@
 {
-  "name": "green-licenses",
+  "name": "js-green-licenses",
   "version": "0.1.0",
-  "description": "NPM package license checker",
+  "description": "JavaScript package.json license checker",
   "main": "build/src/checker.js",
   "bin": "build/src/cli.js",
   "types": "build/src/checker",
@@ -18,7 +18,7 @@
   },
   "keywords": [],
   "author": "Google LLC",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "ava": {
     "files": [
       "build/test/*-test.js"
