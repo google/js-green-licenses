@@ -57,6 +57,7 @@ async function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
   let nonGreenCount = 0;
+  let errorCount = 0;
   checker
       .on('non-green-license',
           ({packageName, version, licenseName, parentPackages}) => {
@@ -75,6 +76,7 @@ async function main(): Promise<void> {
           })
       .on('error',
           ({err, packageName, versionSpec, parentPackages}) => {
+            errorCount++;
             const packageAndVersion = `${packageName}@${versionSpec}`;
             console.log(`Error while checking ${packageAndVersion}:`);
             console.log(
@@ -84,8 +86,14 @@ async function main(): Promise<void> {
             console.log();
           })
       .on('end', () => {
-        if (nonGreenCount > 0) {
-          console.log(`${nonGreenCount} non-green licenses found.`);
+        if (nonGreenCount > 0 || errorCount > 0) {
+          process.exitCode = 1;
+          if (nonGreenCount > 0) {
+            console.log(`${nonGreenCount} non-green licenses found.`);
+          }
+          if (errorCount > 0) {
+            console.log(`${errorCount} errors found.`);
+          }
         } else {
           console.log('All green!');
         }
