@@ -16,7 +16,8 @@
     "start": "node build/src/cli.js",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run check && npm run check-licenses",
+    "check-licenses": "node build/src/cli.js -f package.json"
   },
   "keywords": [],
   "author": "Google LLC",
