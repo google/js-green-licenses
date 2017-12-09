@@ -22,7 +22,7 @@ import {LicenseChecker, NonGreenLicense} from './checker';
 const version = require('../../package.json').version;
 
 const argParser = new ArgumentParser({
-  version: version,
+  version,
   addHelp: true,
   description: 'License checker for npm modules',
 });
