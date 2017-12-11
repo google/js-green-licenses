@@ -9,7 +9,7 @@ dependencies.
 ## How to use
 
 ```shell
-usage: green-licenses [-h] [-v] [--file <package.json>] [--pr <github PR>]
+usage: green-licenses [-h] [-v] [--local <directory>] [--pr <github PR>]
                       [--dev] [--verbose] [<package or package@version>]
 
 License checker for npm modules
@@ -23,8 +23,8 @@ Positional arguments:
 Optional arguments:
   -h, --help            Show this help message and exit.
   -v, --version         Show program's version number and exit.
-  --file <package.json>, -f <package.json>
-                        Check local package.json file instead of public npm.
+  --local <directory>, -l <directory>
+                        Check a local directory instead of public npm.
   --pr <github PR>      Check a github pull request. Must be
                         <owner>/<repo>/pull/<id>
   --dev                 Also check devDependencies.
@@ -32,11 +32,11 @@ Optional arguments:
 ```
 
 This tool checks licenses for 1) an already published NPM package, 2) a local
-`package.json` file, or 3) a GitHub pull request. For checking an NPM
-package, you can just pass the package name (optionally together with the
-version) as the argument. To check a local `package.json` file, you should
-pass the `--file path/to/package.json` argument. To check for a GitHub PR,
-you should pass the `--pr <owner>/<repo>/pull/<id>` argument.
+directory, or 3) a GitHub pull request. For checking an NPM package, you can
+just pass the package name (optionally together with the version) as the
+argument. To check a local directory, you should pass the `--local
+path/to/repo` argument. To check for a GitHub PR, you should pass the `--pr
+<owner>/<repo>/pull/<id>` argument.
 
 If the tool finds any non-green licenses in the given package or in its
 dependencies, they will be printed out together with the detailed

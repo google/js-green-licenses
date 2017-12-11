@@ -16,8 +16,8 @@
     "start": "node build/src/cli.js",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check && npm run check-licenses",
-    "check-licenses": "node build/src/cli.js -f package.json"
+    "posttest": "npm run check && npm run check-self",
+    "check-self": "node build/src/cli.js --local ."
   },
   "keywords": [],
   "author": "Google LLC",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@types/argparse": "^1.0.33",
+    "@types/mock-fs": "^3.6.30",
     "@types/nock": "^8.2.1",
     "@types/node": "^8.0.57",
     "@types/npm-package-arg": "^5.1.0",
@@ -46,6 +47,7 @@
     "@types/spdx-satisfies": "^0.1.0",
     "ava": "^0.24.0",
     "gts": "^0.5.1",
+    "mock-fs": "^4.4.2",
     "nock": "^9.1.4",
     "proxyquire": "^1.8.0",
     "typescript": "~2.6.2"

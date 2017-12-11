@@ -33,9 +33,9 @@ argParser.addArgument(['package'], {
   type: 'string',
   nargs: '?',
 });
-argParser.addArgument(['--file', '-f'], {
-  help: 'Check local package.json file instead of public npm.',
-  metavar: '<package.json>',
+argParser.addArgument(['--local', '-l'], {
+  help: 'Check a local directory instead of public npm.',
+  metavar: '<directory>',
   type: 'string',
   nargs: 1,
 });
@@ -100,8 +100,8 @@ async function main(): Promise<void> {
           console.log('All green!');
         }
       });
-  if (args.file) {
-    await checker.checkLocalPackageJson(args.file[0]);
+  if (args.local) {
+    await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
     const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
     const {mergeCommitSha} = await repo.getPRCommits(prId);
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
   } else if (args.package) {
     await checker.checkRemotePackage(args.package);
   } else {
-    throw new Error('Package name, --file, or --pr must be given');
+    throw new Error('Package name, --local, or --pr must be given');
   }
 }
 

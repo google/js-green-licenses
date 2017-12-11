@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import test from 'ava';
+import * as mockFs from 'mock-fs';
 
 import {PackageJson} from '../src/package-json-file';
 
@@ -42,6 +43,12 @@ proxyquire('../src/checker', {
               version: '4.5.6',
               license: 'EVIL',  // non-green license
             });
+          case 'baz':
+            return Promise.resolve({
+              name: 'baz',
+              version: '7.8.9',
+              license: 'ALSO-EVIL',  // non-green license
+            });
           default:
             throw new Error(`Unexpected package: ${pkg}`);
         }
@@ -50,11 +57,12 @@ proxyquire('../src/checker', {
 
 import {LicenseChecker} from '../src/checker';
 
-const requestedPackages: string[] = [];
+let requestedPackages: string[] = [];
 
-test(
+test.serial(
     'correct packages are requested and non-green-license is emitted',
     async t => {
+      requestedPackages = [];
       const nonGreenPackages: string[] = [];
       const checker = new LicenseChecker({});
       checker.on('non-green-license', arg => {
@@ -64,3 +72,106 @@ test(
       t.deepEqual(requestedPackages, ['foo@latest', 'bar@^4.5.0']);
       t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
     });
+
+test.serial('local directory is checked correctly', async t => {
+  const packageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      foo: '^1.2.3',
+    },
+  });
+  mockFs({
+    'path/to/dir': {
+      'package.json': packageJson,
+      'another-file': 'hello, world',
+    },
+  });
+  try {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker({});
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+    });
+    await checker.checkLocalDirectory('path/to/dir');
+    t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+    t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
+  } finally {
+    mockFs.restore();
+  }
+});
+
+test.serial('local directory should have correct licenses too', async t => {
+  const packageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'EVIL',
+    dependencies: {
+      foo: '^1.2.3',
+    },
+  });
+  mockFs({
+    'path/to/dir': {
+      'package.json': packageJson,
+      'another-file': 'hello, world',
+    },
+  });
+  try {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker({});
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+    });
+    await checker.checkLocalDirectory('path/to/dir');
+    t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+    t.deepEqual(nonGreenPackages, ['hello@1.0.0', 'bar@4.5.6']);
+  } finally {
+    mockFs.restore();
+  }
+});
+
+test.serial('local monorepo directory is checked correctly', async t => {
+  const topLevelPackageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      foo: '^1.2.3',
+    },
+  });
+  const subPackageJson = JSON.stringify({
+    name: 'hello-sub',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      baz: '^7.0.0',
+    },
+  });
+  mockFs({
+    'path/to/dir': {
+      'package.json': topLevelPackageJson,
+      'another-file': 'hello, world',
+      'packages': {
+        'sub-package': {
+          'package.json': subPackageJson,
+        },
+      },
+    },
+  });
+  try {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker({});
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+    });
+    await checker.checkLocalDirectory('path/to/dir');
+    t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0', 'baz@^7.0.0']);
+    t.deepEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
+  } finally {
+    mockFs.restore();
+  }
+});

@@ -15,6 +15,7 @@
 import {EventEmitter} from 'events';
 import * as fs from 'fs';
 import * as npmPackageArg from 'npm-package-arg';
+import * as path from 'path';
 import {promisify} from 'util';
 
 import {GitHubRepository} from './github';
@@ -25,6 +26,8 @@ import packageJson = require('package-json');
 import spdxCorrect = require('spdx-correct');
 import spdxSatisfies = require('spdx-satisfies');
 
+const fsAccess = promisify(fs.access);
+const fsReadDir = promisify(fs.readdir);
 const fsReadFile = promisify(fs.readFile);
 
 // options for constructing LicenseChecker
@@ -135,10 +138,10 @@ export class LicenseChecker extends EventEmitter {
     const spec = `${packageName}@${versionSpec}`;
     if (this.failedPackages.has(spec)) return;
 
-    let json: PackageJson;
     try {
-      json = ensurePackageJson(await packageJson(
-          packageName, {version: versionSpec, fullMetadata: true}));
+      const json = await packageJson(
+          packageName, {version: versionSpec, fullMetadata: true});
+      await this.checkPackageJson(json, packageName, ...parents);
     } catch (err) {
       this.failedPackages.add(spec);
       this.emit('error', {
@@ -147,28 +150,6 @@ export class LicenseChecker extends EventEmitter {
         versionSpec,
         parentPackages: parents,
       });
-      return;
-    }
-    const pkgVersion = json.version;
-    const packageAndVersion = `${packageName}@${pkgVersion}`;
-    if (this.processedPackages.has(packageAndVersion)) return;
-    this.processedPackages.add(packageAndVersion);
-
-    const license = this.getLicense(json);
-    if (!this.isGreenLicense(license)) {
-      this.emit('non-green-license', {
-        packageName,
-        version: pkgVersion,
-        licenseName: license,
-        parentPackages: parents,
-      });
-    }
-
-    await this.checkLicensesForDeps(
-        json.dependencies, ...parents, packageAndVersion);
-    if (this.opts.dev) {
-      await this.checkLicensesForDeps(
-          json.devDependencies, ...parents, packageAndVersion);
     }
   }
 
@@ -181,19 +162,99 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
-  private async checkPackageJsonContent(content: string): Promise<void> {
-    const json: PackageJson = ensurePackageJson(JSON.parse(content));
-    const packageAndVersion = `${json.name}@${json.version}`;
-    await this.checkLicensesForDeps(json.dependencies, packageAndVersion);
+  private async checkPackageJson(
+      json: {}, packageName: string|null, ...parents: string[]): Promise<void> {
+    const pj: PackageJson = ensurePackageJson(json);
+    if (!packageName) {
+      packageName = pj.name;
+    }
+    if (pj.name !== packageName) {
+      console.warn(
+          `Package name mismatch. Expected ${packageName}, but got ${pj.name}`);
+    }
+    const pkgVersion = pj.version;
+    const packageAndVersion = `${packageName}@${pkgVersion}`;
+    if (this.processedPackages.has(packageAndVersion)) return;
+    this.processedPackages.add(packageAndVersion);
+
+    const license = this.getLicense(pj);
+    if (!this.isGreenLicense(license)) {
+      this.emit('non-green-license', {
+        packageName,
+        version: pkgVersion,
+        licenseName: license,
+        parentPackages: parents,
+      });
+    }
+
+    await this.checkLicensesForDeps(
+        pj.dependencies, ...parents, packageAndVersion);
     if (this.opts.dev) {
-      await this.checkLicensesForDeps(json.devDependencies, packageAndVersion);
+      await this.checkLicensesForDeps(
+          pj.devDependencies, ...parents, packageAndVersion);
     }
   }
 
-  async checkLocalPackageJson(packageJsonFile: string): Promise<void> {
+  private async checkPackageJsonContent(content: string): Promise<void> {
+    // tslint:disable-next-line:no-any `JSON.parse()` returns any
+    let json: any = null;
+    try {
+      json = JSON.parse(content);
+      await this.checkPackageJson(json, json.name);
+    } catch (err) {
+      const packageName = (json && json.name) || '(unknown package)';
+      const versionSpec = (json && json.version) || '(unknown version)';
+      this.emit('error', {
+        err,
+        packageName,
+        versionSpec,
+        parentPackages: [],
+      });
+    }
+  }
+
+  async getLocalPackageJsonFiles(directory: string): Promise<string[]> {
+    const packageJsons: string[] = [];
+    const addPackageJson = async (dir: string) => {
+      try {
+        const pj = path.join(dir, 'package.json');
+        await fsAccess(pj);
+        packageJsons.push(pj);
+      } catch {
+        // package.json doesn't exist. Ignore.
+      }
+    };
+
+    // Find the top-level package.json first.
+    await addPackageJson(directory);
+
+    // Find `packages/<name>/package.json` files in case this is a monorepo.
+    try {
+      const packages = path.join(directory, 'packages');
+      const subpackages = await fsReadDir(packages);
+      // This is a monorepo. Find package.json from each directory under
+      // `packages`.
+      for (const dir of subpackages) {
+        await addPackageJson(path.join(packages, dir));
+      }
+    } catch {
+      // The `packages` directory doesn't exist. Not a monorepo. Return just the
+      // top-level package.json.
+    }
+
+    return packageJsons;
+  }
+
+  async checkLocalDirectory(directory: string): Promise<void> {
     this.reset();
-    const content = await fsReadFile(packageJsonFile, 'utf8');
-    await this.checkPackageJsonContent(content);
+    const packageJsons = await this.getLocalPackageJsonFiles(directory);
+    if (packageJsons.length === 0) {
+      console.log('No package.json files have been found.');
+    }
+    for (const pj of packageJsons) {
+      const content = await fsReadFile(pj, 'utf8');
+      await this.checkPackageJsonContent(content);
+    }
     this.emit('end');
   }
 
@@ -227,6 +288,7 @@ export class LicenseChecker extends EventEmitter {
 
   async checkGithubPR(repo: GitHubRepository, mergeCommitSha: string):
       Promise<void> {
+    this.reset();
     const packageJsons = await repo.getPackageJsonFiles(mergeCommitSha);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');
