@@ -175,3 +175,37 @@ test.serial('local monorepo directory is checked correctly', async t => {
     mockFs.restore();
   }
 });
+
+test.serial('package whitelist should be respected (local repo)', async t => {
+  const packageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      foo: '^1.2.3',
+    },
+  });
+  const configJson = JSON.stringify({
+    packageWhitelist: [
+      'bar',
+    ],
+  });
+  mockFs({
+    'path/to/dir': {
+      'package.json': packageJson,
+      'js-green-licenses.json': configJson,
+    },
+  });
+  try {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker({});
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+    });
+    await checker.checkLocalDirectory('path/to/dir');
+    t.is(nonGreenPackages.length, 0);
+  } finally {
+    mockFs.restore();
+  }
+});

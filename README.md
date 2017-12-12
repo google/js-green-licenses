@@ -9,8 +9,8 @@ dependencies.
 ## How to use
 
 ```shell
-usage: green-licenses [-h] [-v] [--local <directory>] [--pr <github PR>]
-                      [--dev] [--verbose] [<package or package@version>]
+usage: jsgl [-h] [-v] [--local <directory>] [--pr <github PR>]
+            [--dev] [--verbose] [<package or package@version>]
 
 License checker for npm modules
 

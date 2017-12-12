@@ -18,6 +18,7 @@ import * as npmPackageArg from 'npm-package-arg';
 import * as path from 'path';
 import {promisify} from 'util';
 
+import * as config from './config';
 import {GitHubRepository} from './github';
 import {GREEN_LICENSE_EXPR, WHITELISTED_LICENSES} from './licenses';
 import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file';
@@ -60,6 +61,7 @@ export class LicenseChecker extends EventEmitter {
   // Cache for packageName@version's that failed for fetching.
   private readonly failedPackages: Set<string> = new Set();
   private readonly opts: LicenseCheckerOptions;
+  private config: config.Config = {};
 
   constructor({dev = false, verbose = false}: LicenseCheckerOptions) {
     super();
@@ -112,6 +114,11 @@ export class LicenseChecker extends EventEmitter {
       console.warn(`Correcting ${license} to ${corrected}`);
     }
     return corrected;
+  }
+
+  private isPackageWhitelisted(packageName: string): boolean {
+    return !!this.config.packageWhitelist &&
+        this.config.packageWhitelist.includes(packageName);
   }
 
   private isGreenLicense(license: string|null): boolean {
@@ -177,14 +184,18 @@ export class LicenseChecker extends EventEmitter {
     if (this.processedPackages.has(packageAndVersion)) return;
     this.processedPackages.add(packageAndVersion);
 
-    const license = this.getLicense(pj);
-    if (!this.isGreenLicense(license)) {
-      this.emit('non-green-license', {
-        packageName,
-        version: pkgVersion,
-        licenseName: license,
-        parentPackages: parents,
-      });
+    if (this.isPackageWhitelisted(packageName)) {
+      console.log(`${packageName} is whitelisted.`);
+    } else {
+      const license = this.getLicense(pj);
+      if (!this.isGreenLicense(license)) {
+        this.emit('non-green-license', {
+          packageName,
+          version: pkgVersion,
+          licenseName: license,
+          parentPackages: parents,
+        });
+      }
     }
 
     await this.checkLicensesForDeps(
@@ -247,6 +258,7 @@ export class LicenseChecker extends EventEmitter {
 
   async checkLocalDirectory(directory: string): Promise<void> {
     this.reset();
+    this.config = await config.getLocalConfig(directory) || {};
     const packageJsons = await this.getLocalPackageJsonFiles(directory);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');
