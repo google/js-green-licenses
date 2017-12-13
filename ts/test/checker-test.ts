@@ -209,3 +209,40 @@ test.serial('package whitelist should be respected (local repo)', async t => {
     mockFs.restore();
   }
 });
+
+
+test.serial('custom green license list (local repo)', async t => {
+  const packageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Foo License',
+    dependencies: {
+      foo: '^1.2.3',
+    },
+  });
+  const configJson = JSON.stringify({
+    greenLicenses: [
+      'Foo License',
+      'EVIL',
+    ],
+  });
+  mockFs({
+    'path/to/dir': {
+      'package.json': packageJson,
+      'js-green-licenses.json': configJson,
+    },
+  });
+  try {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker({});
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+    });
+    await checker.checkLocalDirectory('path/to/dir');
+    t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+    t.deepEqual(nonGreenPackages, ['foo@1.2.3']);  // ISC is not green now.
+  } finally {
+    mockFs.restore();
+  }
+});

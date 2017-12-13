@@ -20,7 +20,6 @@ import {promisify} from 'util';
 
 import * as config from './config';
 import {GitHubRepository} from './github';
-import {GREEN_LICENSE_EXPR, WHITELISTED_LICENSES} from './licenses';
 import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file';
 
 import packageJson = require('package-json');
@@ -30,6 +29,24 @@ import spdxSatisfies = require('spdx-satisfies');
 const fsAccess = promisify(fs.access);
 const fsReadDir = promisify(fs.readdir);
 const fsReadFile = promisify(fs.readFile);
+
+// Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
+// possible. When adding new licenses, please consult the relevant documents and
+// OSPO.
+const DEFAULT_GREEN_LICENSES = [
+  'Apache-2.0',
+  'BSD-2-Clause',
+  'BSD-3-Clause',
+  'CC-BY-3.0',
+  'CC0-1.0',
+  'ISC',
+  'LGPL-2.0',
+  'LGPL-2.1',
+  'LGPL-3.0',
+  'MIT',
+  'Public Domain',
+  'Unlicense',
+];
 
 // options for constructing LicenseChecker
 export interface LicenseCheckerOptions {
@@ -62,6 +79,11 @@ export class LicenseChecker extends EventEmitter {
   private readonly failedPackages: Set<string> = new Set();
   private readonly opts: LicenseCheckerOptions;
   private config: config.Config = {};
+  // Licenses in this expression must be valid license IDs defined in
+  // https://spdx.org/licenses/.
+  private greenLicenseExpr = '';
+  // List of license names that are not SPDX-conforming IDs but are allowed.
+  private whitelistedLicenses: string[] = [];
 
   constructor({dev = false, verbose = false}: LicenseCheckerOptions) {
     super();
@@ -88,7 +110,23 @@ export class LicenseChecker extends EventEmitter {
     return super.emit(event, ...args);
   }
 
-  private reset(): void {
+  private init(cfg: config.Config|null): void {
+    this.config = cfg || {};
+
+    const greenLicenses = this.config.greenLicenses || DEFAULT_GREEN_LICENSES;
+    const validGreenLicenses: string[] = [];
+    const invalidGreenLicenses: string[] = [];
+    for (const license of greenLicenses) {
+      const corrected = this.correctLicenseName(license);
+      if (corrected) {
+        validGreenLicenses.push(corrected);
+      } else {
+        invalidGreenLicenses.push(license);
+      }
+    }
+    this.greenLicenseExpr = `(${validGreenLicenses.join(' OR ')})`;
+    this.whitelistedLicenses = invalidGreenLicenses;
+
     this.processedPackages.clear();
     this.failedPackages.clear();
   }
@@ -126,10 +164,10 @@ export class LicenseChecker extends EventEmitter {
 
     const correctedName = this.correctLicenseName(license);
     // `license` is not a valid or correctable SPDX id. Check the whitelist.
-    if (!correctedName) return WHITELISTED_LICENSES.includes(license);
+    if (!correctedName) return this.whitelistedLicenses.includes(license);
 
     try {
-      return spdxSatisfies(correctedName, GREEN_LICENSE_EXPR);
+      return spdxSatisfies(correctedName, this.greenLicenseExpr);
     } catch (err) {
       // Most likely because license is not recognized. Just return false.
       if (this.opts.verbose) {
@@ -224,7 +262,7 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
-  async getLocalPackageJsonFiles(directory: string): Promise<string[]> {
+  private async getLocalPackageJsonFiles(directory: string): Promise<string[]> {
     const packageJsons: string[] = [];
     const addPackageJson = async (dir: string) => {
       try {
@@ -257,8 +295,7 @@ export class LicenseChecker extends EventEmitter {
   }
 
   async checkLocalDirectory(directory: string): Promise<void> {
-    this.reset();
-    this.config = await config.getLocalConfig(directory) || {};
+    this.init(await config.getLocalConfig(directory));
     const packageJsons = await this.getLocalPackageJsonFiles(directory);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');
@@ -271,7 +308,8 @@ export class LicenseChecker extends EventEmitter {
   }
 
   async checkRemotePackage(pkg: string): Promise<void> {
-    this.reset();
+    // For checking remote packages, use config file in the current directory.
+    this.init(await config.getLocalConfig(process.cwd()));
     const pkgArgs = npmPackageArg(pkg);
     const pkgType = pkgArgs.type;
     if (!['tag', 'version', 'range'].includes(pkgType)) {
@@ -298,9 +336,9 @@ export class LicenseChecker extends EventEmitter {
     return {repo: new GitHubRepository(owner, repoName), prId: Number(prId)};
   }
 
-  async checkGithubPR(repo: GitHubRepository, mergeCommitSha: string):
+  async checkGitHubPR(repo: GitHubRepository, mergeCommitSha: string):
       Promise<void> {
-    this.reset();
+    this.init(await config.getGitHubConfig(repo, mergeCommitSha));
     const packageJsons = await repo.getPackageJsonFiles(mergeCommitSha);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');

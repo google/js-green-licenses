@@ -119,6 +119,18 @@ test.serial('should throw when PR HEAD commit sha is not found', async (t) => {
   t.is(err.message, 'HEAD commit SHA is not found');
 });
 
+test.serial('retrieve file content', async (t) => {
+  const scope =
+      nock('https://api.github.com')
+          .get('/repos/luke/star-destroyer/contents/src/foo.js?ref=deadbeef')
+          .reply(200, {
+            content: Buffer.from('this is foo.js').toString('base64'),
+          });
+  const content = await t.context.repo.getFileContent('deadbeef', 'src/foo.js');
+  scope.done();
+  t.is(content, 'this is foo.js');
+});
+
 test.serial('should retrieve package.json from a single repo', async (t) => {
   const scope =
       nock('https://api.github.com')

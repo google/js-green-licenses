@@ -105,7 +105,7 @@ async function main(): Promise<void> {
   } else if (args.pr) {
     const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
     const {mergeCommitSha} = await repo.getPRCommits(prId);
-    await checker.checkGithubPR(repo, mergeCommitSha);
+    await checker.checkGitHubPR(repo, mergeCommitSha);
   } else if (args.package) {
     await checker.checkRemotePackage(args.package);
   } else {
