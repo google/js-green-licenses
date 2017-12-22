@@ -19,9 +19,14 @@
     "posttest": "npm run check && npm run check-self",
     "check-self": "node build/src/cli.js --local ."
   },
-  "keywords": [],
+  "keywords": [
+    "npm",
+    "package",
+    "license"
+  ],
   "author": "Google LLC",
   "license": "Apache-2.0",
+  "repository": "github:google/js-green-licenses",
   "ava": {
     "files": [
       "build/test/*-test.js"

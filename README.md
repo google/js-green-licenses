@@ -8,7 +8,7 @@ dependencies.
 
 ## CLI
 
-```shell
+```
 usage: jsgl [-h] [-v] [--local <directory>] [--pr <github PR>]
             [--dev] [--verbose] [<package or package@version>]
 
