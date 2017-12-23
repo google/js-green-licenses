@@ -31,8 +31,7 @@ const fsReadDir = promisify(fs.readdir);
 const fsReadFile = promisify(fs.readFile);
 
 // Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
-// possible. When adding new licenses, please consult the relevant documents and
-// OSPO.
+// possible. When adding new licenses, please consult the relevant documents.
 const DEFAULT_GREEN_LICENSES = [
   'Apache-2.0',
   'BSD-2-Clause',

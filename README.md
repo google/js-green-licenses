@@ -85,6 +85,24 @@ you would like to consider green. The license IDs must be listed in the
 `greenLicenses` section of the configuration file. In that case, `jsgl` will
 use that custom list instead of its default list.
 
+The default green license list is:
+```javascript
+const DEFAULT_GREEN_LICENSES = [
+  'Apache-2.0',
+  'BSD-2-Clause',
+  'BSD-3-Clause',
+  'CC-BY-3.0',
+  'CC0-1.0',
+  'ISC',
+  'LGPL-2.0',
+  'LGPL-2.1',
+  'LGPL-3.0',
+  'MIT',
+  'Public Domain',
+  'Unlicense',
+];
+```
+
 You can also whitelist some NPM packages and they will be considered "green"
 even when they have non-green licenses or no licenses. It's useful when
 `jsgl` is unable to verify the validness of a certain package's license for
@@ -131,8 +149,8 @@ use.
 
 ### Instantiation
 
-```typescript
-const opts: LicenseCheckerOptions = {
+```javascript
+const opts = {
   dev: false,
   verbose: true,
 };
