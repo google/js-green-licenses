@@ -22,11 +22,13 @@ workflows:
   version: 2
   tests:
     jobs:
+      - node4
       - node6
       - node8
       - node9
       - publish_npm:
           requires:
+            - node4
             - node6
             - node8
             - node9
@@ -37,6 +39,10 @@ workflows:
               only: /^v[\d.]+$/
 
 jobs:
+  node4:
+    docker:
+      - image: node:4
+    <<: *unit_tests
   node6:
     docker:
       - image: node:6
