@@ -1,5 +1,7 @@
 # JavaScript package.json License Checker
 
+dummy change
+
 **This is not an official Google product.**
 
 This is a tool for checking the license of JavaScript projects. It scans the
