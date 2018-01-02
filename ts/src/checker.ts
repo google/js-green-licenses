@@ -27,6 +27,8 @@ import packageJson = require('package-json');
 import spdxCorrect = require('spdx-correct');
 import spdxSatisfies = require('spdx-satisfies');
 
+export {GitHubRepository} from './github';
+
 const fsAccess = pify(fs.access);
 const fsReadDir = pify(fs.readdir);
 const fsReadFile = pify(fs.readFile);
