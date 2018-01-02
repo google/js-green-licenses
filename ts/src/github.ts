@@ -18,7 +18,7 @@
 import axios from 'axios';
 import {AxiosRequestConfig} from 'axios';
 import {posix as posixPath} from 'path';
-import {URL, URLSearchParams} from 'url';
+import {format as urlFormat, parse as urlParse} from 'url';
 
 interface SingleResponseData {
   content?: string;
@@ -73,20 +73,19 @@ export class GitHubRepository {
 
   private async apiGet(path: string, params?: QueryParams):
       Promise<ResponseData> {
-    const url = new URL('https://api.github.com');
+    const url = urlParse('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
     if (params) {
-      const searchParams = new URLSearchParams(params);
-      url.search = searchParams.toString();
+      url.query = params;
     }
-    const resp = await axios.get(url.toString(), this.getAxiosConfig());
+    const resp = await axios.get(urlFormat(url), this.getAxiosConfig());
     return resp.data;
   }
 
   private async apiPost(path: string, body?: {}): Promise<ResponseData> {
-    const url = new URL('https://api.github.com');
+    const url = urlParse('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
-    const resp = await axios.post(url.toString(), body, this.getAxiosConfig());
+    const resp = await axios.post(urlFormat(url), body, this.getAxiosConfig());
     return resp.data;
   }
 

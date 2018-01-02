@@ -16,7 +16,7 @@ import {EventEmitter} from 'events';
 import * as fs from 'fs';
 import * as npmPackageArg from 'npm-package-arg';
 import * as path from 'path';
-import {promisify} from 'util';
+import * as pify from 'pify';
 
 import * as config from './config';
 import {GitHubRepository} from './github';
@@ -26,9 +26,9 @@ import packageJson = require('package-json');
 import spdxCorrect = require('spdx-correct');
 import spdxSatisfies = require('spdx-satisfies');
 
-const fsAccess = promisify(fs.access);
-const fsReadDir = promisify(fs.readdir);
-const fsReadFile = promisify(fs.readFile);
+const fsAccess = pify(fs.access);
+const fsReadDir = pify(fs.readdir);
+const fsReadFile = pify(fs.readFile);
 
 // Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
 // possible. When adding new licenses, please consult the relevant documents.
@@ -155,7 +155,7 @@ export class LicenseChecker extends EventEmitter {
 
   private isPackageWhitelisted(packageName: string): boolean {
     return !!this.config.packageWhitelist &&
-        this.config.packageWhitelist.includes(packageName);
+        this.config.packageWhitelist.some((p) => p === packageName);
   }
 
   private isGreenLicense(license: string|null): boolean {
@@ -163,7 +163,9 @@ export class LicenseChecker extends EventEmitter {
 
     const correctedName = this.correctLicenseName(license);
     // `license` is not a valid or correctable SPDX id. Check the whitelist.
-    if (!correctedName) return this.whitelistedLicenses.includes(license);
+    if (!correctedName) {
+      return this.whitelistedLicenses.some((l) => l === license);
+    }
 
     try {
       return spdxSatisfies(correctedName, this.greenLicenseExpr);
@@ -311,7 +313,7 @@ export class LicenseChecker extends EventEmitter {
     this.init(await config.getLocalConfig(process.cwd()));
     const pkgArgs = npmPackageArg(pkg);
     const pkgType = pkgArgs.type;
-    if (!['tag', 'version', 'range'].includes(pkgType)) {
+    if (!['tag', 'version', 'range'].some((type) => type === pkgType)) {
       throw new Error(`Unsupported package spec: ${pkg}`);
     }
     if (!pkgArgs.name || !pkgArgs.fetchSpec) {
