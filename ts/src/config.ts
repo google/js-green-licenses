@@ -1,10 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {promisify} from 'util';
+import * as pify from 'pify';
 
 import {GitHubRepository} from './github';
 
-const fsReadFile = promisify(fs.readFile);
+const fsReadFile = pify(fs.readFile);
 
 const CONFIG_FILE_NAME = 'js-green-licenses.json';
 

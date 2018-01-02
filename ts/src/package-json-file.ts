@@ -40,8 +40,14 @@ function isLicense(obj: {}): obj is License {
       (Array.isArray(obj) && obj.every(isOldLicenseField));
 }
 
-function isDependencies(obj: {}): obj is Dependencies {
-  return Object.values(obj).every(x => typeof x === 'string');
+// tslint:disable-next-line:no-any `obj` is from JSON and can be any.
+function isDependencies(obj: any): obj is Dependencies {
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key) && typeof obj[key] !== 'string') {
+      return false;
+    }
+  }
+  return true;
 }
 
 function isPackageJson(obj: {}): obj is PackageJson {
