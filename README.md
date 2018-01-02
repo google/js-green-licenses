@@ -1,5 +1,12 @@
 # JavaScript package.json License Checker
 
+[![NPM Version][npm-image]][npm-url]
+[![CircleCI][circle-image]][circle-url]
+[![Dependency Status][david-image]][david-url]
+[![devDependency Status][david-dev-image]][david-dev-url]
+[![Known Vulnerabilities][snyk-image]][snyk-url]
+[![codecov][codecov-image]][codecov-url]
+
 **This is not an official Google product.**
 
 This is a tool for checking the license of JavaScript projects. It scans the
@@ -223,3 +230,16 @@ can create its instance by calling
     `prPath` must be in the form, `<owner>/<repo>/pull/<id>`. This method
     will return the `GitHubRepository` instance and the PR id for the
     `prPath`.
+
+[circle-image]: https://circleci.com/gh/google/js-green-licenses.svg?style=svg
+[circle-url]: https://circleci.com/gh/google/js-green-licenses
+[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/google/js-green-licenses
+[david-dev-image]: https://david-dm.org/google/js-green-licenses/dev-status.svg
+[david-dev-url]: https://david-dm.org/google/js-green-licenses?type=dev
+[david-image]: https://david-dm.org/google/js-green-licenses.svg
+[david-url]: https://david-dm.org/google/js-green-licenses
+[npm-image]: https://img.shields.io/npm/v/js-green-licenses.svg
+[npm-url]: https://npmjs.org/package/js-green-licenses
+[snyk-image]: https://snyk.io/test/github/google/js-green-licenses/badge.svg
+[snyk-url]: https://snyk.io/test/github/google/js-green-licenses
