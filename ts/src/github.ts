@@ -133,21 +133,30 @@ export class GitHubRepository {
         {state: status, description, context});
   }
 
-  private async getSinglePackageJson(dir: string, commitSha: string):
-      Promise<PackageJsonFile|null> {
+  async getFileContent(commitSha: string, path: string): Promise<string|null> {
     let answer: ResponseData;
     try {
-      answer = await this.apiGet(
-          posixPath.join('contents', dir, 'package.json'), {ref: commitSha});
+      answer =
+          await this.apiGet(posixPath.join('contents', path), {ref: commitSha});
     } catch {
       return null;
     }
     answer = ensureSingleResponseData(answer);
     if (answer.content === undefined) {
-      throw new Error('Content of package.json not found');
+      throw new Error(`Content of ${path} not found`);
+    }
+    const content = Buffer.from(answer.content, 'base64').toString();
+    return content;
+  }
+
+  private async getSinglePackageJson(dir: string, commitSha: string):
+      Promise<PackageJsonFile|null> {
+    const content = await this.getFileContent(
+        commitSha, posixPath.join(dir, 'package.json'));
+    if (!content) {
+      return null;
     }
     const filePath = posixPath.join('/', dir, 'package.json');
-    const content = Buffer.from(answer.content, 'base64').toString();
     return {filePath, content};
   }
 
