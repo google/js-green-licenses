@@ -13,6 +13,18 @@ This is a tool for checking the license of JavaScript projects. It scans the
 `package.json` file to check its license and recursively checks all of its
 dependencies.
 
+## Installation
+
+```shell
+npm install [--save-dev] js-green-licenses
+```
+
+If you want to install globally,
+
+```shell
+npm install -g js-green-licenses
+```
+
 ## CLI
 
 ```
