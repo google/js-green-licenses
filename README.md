@@ -169,6 +169,21 @@ When `dev` is true, the `devDependencies` section is checked as well as the
 `dependencies` section of `package.json`. When `verbose` is true, `jsgl`
 generates more verbose output.
 
+### Use in Gulp
+
+```javascript
+const jsgl = require('js-green-licenses');
+
+gulp.task('check_licenses', function() {
+  const checker = new jsgl.LicenseChecker({
+    dev: true,
+    verbose: false,
+  });
+  checker.setDefaultHandlers();
+  return checker.checkLocalDirectory('.');
+});
+```
+
 ### Methods
 
 *   `LicenseChecker#checkLocalDirectory()`

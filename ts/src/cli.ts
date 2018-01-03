@@ -15,7 +15,6 @@
 // limitations under the License.
 
 import {ArgumentParser} from 'argparse';
-import {inspect} from 'util';
 
 import {LicenseChecker, NonGreenLicense} from './checker';
 
@@ -58,48 +57,7 @@ const args = argParser.parseArgs();
 async function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
-  let nonGreenCount = 0;
-  let errorCount = 0;
-  checker
-      .on('non-green-license',
-          ({packageName, version, licenseName, parentPackages}) => {
-            nonGreenCount++;
-            const licenseDisplay = licenseName || '(no license)';
-            const packageAndVersion = `${packageName}@${version}`;
-            console.log(`${licenseDisplay}: ${packageAndVersion}`);
-            console.log(
-                `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
-            console.log();
-          })
-      .on('package.json',
-          (filePath) => {
-            console.log(`Checking ${filePath}...`);
-            console.log();
-          })
-      .on('error',
-          ({err, packageName, versionSpec, parentPackages}) => {
-            errorCount++;
-            const packageAndVersion = `${packageName}@${versionSpec}`;
-            console.log(`Error while checking ${packageAndVersion}:`);
-            console.log(
-                `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
-            console.log();
-            console.log(`${inspect(err)}`);
-            console.log();
-          })
-      .on('end', () => {
-        if (nonGreenCount > 0 || errorCount > 0) {
-          process.exitCode = 1;
-          if (nonGreenCount > 0) {
-            console.log(`${nonGreenCount} non-green licenses found.`);
-          }
-          if (errorCount > 0) {
-            console.log(`${errorCount} errors found.`);
-          }
-        } else {
-          console.log('All green!');
-        }
-      });
+  checker.setDefaultHandlers();
   if (args.local) {
     await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
