@@ -246,3 +246,24 @@ test.serial('custom green license list (local repo)', async t => {
     mockFs.restore();
   }
 });
+
+test.serial('errors properly output to console', async t => {
+  // temporarily mock out global console.log so we can see what gets
+  // written there.
+  const realConsoleLog = console.log;
+  let consoleOutput = '';
+  console.log = (output) => {
+    if (output !== undefined) {
+      consoleOutput += output;
+    }
+    consoleOutput += '\n';
+  };
+  requestedPackages = [];
+  const nonGreenPackages: string[] = [];
+  const checker = new LicenseChecker({});
+  checker.setDefaultHandlers();
+  await checker.checkRemotePackage('foo');
+  console.log = realConsoleLog;
+  t.regex(consoleOutput, /EVIL: bar@4\.5\.6/);
+  t.regex(consoleOutput, /1 non-green licenses found\./);
+});
