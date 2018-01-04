@@ -117,7 +117,6 @@ const DEFAULT_GREEN_LICENSES = [
   'LGPL-2.1',
   'LGPL-3.0',
   'MIT',
-  'Public Domain',
   'Unlicense',
 ];
 ```
