@@ -73,7 +73,7 @@ export class GitHubRepository {
 
   private async apiGet(path: string, params?: QueryParams):
       Promise<ResponseData> {
-    const url = urlParse('https://api.github.com');
+    const url = urlParse('https://api.github.com', true);
     url.pathname = posixPath.join(this.pathPrefix, path);
     if (params) {
       url.query = params;
