@@ -130,17 +130,19 @@ You can whitelist that package to make `jsgl` not complain about that
 package.
 
 A typical configuration file looks like this:
-```json
+```javascript
 {
   "greenLicenses": [
+    // Custom green licenses.
     "Apache-2.0",
     "MIT",
     "BSD-3-Clause",
     ...
   ],
   "packageWhitelist": [
+    /* packages considered ok */
     "foo",
-    "bar",
+    "bar",  // inline comment
     "package-with-no-license",
     "package-with-okish-license",
     ...
@@ -150,6 +152,8 @@ A typical configuration file looks like this:
 
 The `greenLicenses` section is for the custom license list and the
 `packageWhitelist` section is for the package whitelist.
+
+Note that comments are allowed in `js-green-licenses.json`.
 
 The configuration file must be located in the top-level directory of a
 repository for `--local` and `--pr`. When checking remote NPM packages,
