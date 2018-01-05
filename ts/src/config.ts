@@ -59,7 +59,8 @@ export async function getGitHubConfig(
   }
   try {
     return ensureConfig(parseJson(content));
-  } catch {
+  } catch (err) {
+    console.error('[js-green-licenses] Error while reading config file:', err);
     return null;
   }
 }
