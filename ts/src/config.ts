@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pify from 'pify';
+import * as stripJsonComments from 'strip-json-comments';
 
 import {GitHubRepository} from './github';
 
@@ -32,11 +33,15 @@ function ensureConfig(obj: {}): Config {
   return obj;
 }
 
+function parseJson(input: string): {} {
+  return JSON.parse(stripJsonComments(input));
+}
+
 export async function getLocalConfig(directory: string): Promise<Config|null> {
   try {
     const content =
         await fsReadFile(path.join(directory, CONFIG_FILE_NAME), 'utf8');
-    return ensureConfig(JSON.parse(content));
+    return ensureConfig(parseJson(content));
   } catch (err) {
     if (err.code !== 'ENOENT') {
       console.error(
@@ -53,7 +58,7 @@ export async function getGitHubConfig(
     return null;
   }
   try {
-    return ensureConfig(JSON.parse(content));
+    return ensureConfig(parseJson(content));
   } catch {
     return null;
   }
