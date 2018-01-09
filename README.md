@@ -201,6 +201,15 @@ gulp.task('check_licenses', function() {
 
 ### Methods
 
+*   `LicenseChecker#setDefaultHandler()`
+
+    ```typescript
+    setDefaultHandlers(): void;
+    ```
+
+    Sets the default event handlers that are used by the CLI. For events
+    emitted by `LicenseChecker`, see the [*Events*](#hd-events) subsection.
+
 *   `LicenseChecker#checkLocalDirectory()`
 
     ```typescript
@@ -244,9 +253,9 @@ gulp.task('check_licenses', function() {
     This method reads in the configuration from the `js-green-licenses.json`
     file in the repository, if it exists.
 
-`GitHubRepository` is a helper class for interacting with the GitHub API. You
-can create its instance by calling
-`LicenseChecker#prPathToGitHubRepoAndId()`.
+    `GitHubRepository` is a helper class for interacting with the GitHub API.
+    You can create its instance by calling
+    `LicenseChecker#prPathToGitHubRepoAndId()`.
 
 *   `LicenseChecker#prPathToGitHubRepoAndId()`
 
@@ -260,6 +269,42 @@ can create its instance by calling
     `prPath` must be in the form, `<owner>/<repo>/pull/<id>`. This method
     will return the `GitHubRepository` instance and the PR id for the
     `prPath`.
+
+### <a name="hd-events"></a>Events
+
+A `LicenseChecker` object emits following events during its processing.
+
+*   `non-green-license`
+    Emitted when a package with a non-green license is detected. The argument is
+    ```typescript
+    interface NonGreenLicense {
+      packageName: string;
+      version: string;
+      licenseName: string|null;
+      parentPackages: string[];
+    }
+    ```
+
+*   `package.json`
+    Emitted for each `package.json` file being checked. This is emitted only
+    when checking local repositories or GitHub repositories, but not when
+    checking remote packages.
+
+    The argument is a file path string of the corresponding `package.json` file.
+
+*   `end`
+    Emitted when the processing is done. No argument is given.
+
+*   `error`
+    Emitted when an error occurrs while processing. The argument is
+    ```typescript
+    interface CheckError {
+      err: Error;
+      packageName: string;
+      versionSpec: string;
+      parentPackages: string[];
+    }
+    ```
 
 [circle-image]: https://circleci.com/gh/google/js-green-licenses.svg?style=svg
 [circle-url]: https://circleci.com/gh/google/js-green-licenses
