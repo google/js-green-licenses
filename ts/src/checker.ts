@@ -355,7 +355,7 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** set default event handlers for CLI output. */
-  setDefaultHandlers() {
+  setDefaultHandlers(): void {
     let nonGreenCount = 0;
     let errorCount = 0;
     this.on('non-green-license',
