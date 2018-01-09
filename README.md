@@ -270,7 +270,7 @@ gulp.task('check_licenses', function() {
     will return the `GitHubRepository` instance and the PR id for the
     `prPath`.
 
-### Events<a name="hd-events"></a>
+### <a name="hd-events"></a>Events
 
 A `LicenseChecker` object emits following events during its processing.
 
