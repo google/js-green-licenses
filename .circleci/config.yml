@@ -22,10 +22,22 @@ workflows:
   version: 2
   tests:
     jobs:
-      - node4
-      - node6
-      - node8
-      - node9
+      - node4:
+          filters:
+            tags:
+              only: /^v[\d.]+$/
+      - node6:
+          filters:
+            tags:
+              only: /^v[\d.]+$/
+      - node8:
+          filters:
+            tags:
+              only: /^v[\d.]+$/
+      - node9:
+          filters:
+            tags:
+              only: /^v[\d.]+$/
       - publish_npm:
           requires:
             - node4
