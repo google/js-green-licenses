@@ -164,13 +164,23 @@ test.serial('local monorepo directory is checked correctly', async t => {
   try {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
+    const packageJsonPaths: string[] = [];
     const checker = new LicenseChecker({});
-    checker.on('non-green-license', arg => {
-      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-    });
+    checker
+        .on('non-green-license',
+            (arg) => {
+              nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+            })
+        .on('package.json', (filePath) => {
+          packageJsonPaths.push(filePath);
+        });
     await checker.checkLocalDirectory('path/to/dir');
     t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0', 'baz@^7.0.0']);
     t.deepEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
+    t.deepEqual(packageJsonPaths, [
+      'path/to/dir/package.json',
+      'path/to/dir/packages/sub-package/package.json',
+    ]);
   } finally {
     mockFs.restore();
   }
