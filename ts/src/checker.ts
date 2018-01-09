@@ -93,7 +93,7 @@ export class LicenseChecker extends EventEmitter {
 
   on(event: 'non-green-license',
      listener: (arg: NonGreenLicense) => void): this;
-  // 'package.json' events are emitted only for github PR checkings.
+  // 'package.json' events are not emitted for remote packages.
   on(event: 'package.json', listener: (filePath: string) => void): this;
   on(event: 'end', listener: () => void): this;
   on(event: 'error', listener: (checkError: CheckError) => void): this;
@@ -304,6 +304,7 @@ export class LicenseChecker extends EventEmitter {
       console.log('No package.json files have been found.');
     }
     for (const pj of packageJsons) {
+      this.emit('package.json', pj);
       const content = await fsReadFile(pj, 'utf8');
       await this.checkPackageJsonContent(content);
     }
