@@ -1,11 +1,17 @@
 {
   "name": "js-green-licenses",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "JavaScript package.json license checker",
   "main": "build/src/checker.js",
   "bin": {
     "jsgl": "build/src/cli.js"
   },
+  "files": [
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "build/src"
+  ],
   "types": "build/src/checker",
   "scripts": {
     "test": "nyc ava",
