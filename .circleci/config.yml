@@ -22,19 +22,19 @@ workflows:
   version: 2
   tests:
     jobs:
-      - node4
+      - node4:
           filters:
             tags:
               only: /^v[\d.]+$/
-      - node6
+      - node6:
           filters:
             tags:
               only: /^v[\d.]+$/
-      - node8
+      - node8:
           filters:
             tags:
               only: /^v[\d.]+$/
-      - node9
+      - node9:
           filters:
             tags:
               only: /^v[\d.]+$/
