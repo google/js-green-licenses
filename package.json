@@ -6,6 +6,12 @@
   "bin": {
     "jsgl": "build/src/cli.js"
   },
+  "files": [
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "README.md",
+    "build/src"
+  ],
   "types": "build/src/checker",
   "scripts": {
     "test": "nyc ava",
