@@ -36,7 +36,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^v[\d.]+$/
+              only: /^v[0-9]+(\.[0-9]+)*$/
 
 jobs:
   node4:
