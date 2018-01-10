@@ -22,19 +22,19 @@ workflows:
       - node4:
           filters:
             tags:
-              only: /^v[\d.]+$/
+              only: /^v\d+(\.\d+){2}(-.*)?$/
       - node6:
           filters:
             tags:
-              only: /^v[\d.]+$/
+              only: /^v\d+(\.\d+){2}(-.*)?$/
       - node8:
           filters:
             tags:
-              only: /^v[\d.]+$/
+              only: /^v\d+(\.\d+){2}(-.*)?$/
       - node9:
           filters:
             tags:
-              only: /^v[\d.]+$/
+              only: /^v\d+(\.\d+){2}(-.*)?$/
       - publish_npm:
           requires:
             - node4
@@ -45,7 +45,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^v[\d.]+$/
+              only: /^v\d+(\.\d+){2}(-.*)?$/
 
 jobs:
   node4:
