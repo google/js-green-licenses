@@ -64,7 +64,7 @@ test.serial(
     async t => {
       requestedPackages = [];
       const nonGreenPackages: string[] = [];
-      const checker = new LicenseChecker({});
+      const checker = new LicenseChecker();
       checker.on('non-green-license', arg => {
         nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
@@ -91,7 +91,7 @@ test.serial('local directory is checked correctly', async t => {
   try {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
-    const checker = new LicenseChecker({});
+    const checker = new LicenseChecker();
     checker.on('non-green-license', arg => {
       nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
     });
@@ -121,7 +121,7 @@ test.serial('local directory should have correct licenses too', async t => {
   try {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
-    const checker = new LicenseChecker({});
+    const checker = new LicenseChecker();
     checker.on('non-green-license', arg => {
       nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
     });
@@ -165,7 +165,7 @@ test.serial('local monorepo directory is checked correctly', async t => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const packageJsonPaths: string[] = [];
-    const checker = new LicenseChecker({});
+    const checker = new LicenseChecker();
     checker
         .on('non-green-license',
             (arg) => {
@@ -209,7 +209,7 @@ test.serial('package whitelist should be respected (local repo)', async t => {
   try {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
-    const checker = new LicenseChecker({});
+    const checker = new LicenseChecker();
     checker.on('non-green-license', arg => {
       nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
     });
@@ -245,7 +245,7 @@ test.serial('custom green license list (local repo)', async t => {
   try {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
-    const checker = new LicenseChecker({});
+    const checker = new LicenseChecker();
     checker.on('non-green-license', arg => {
       nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
     });
@@ -270,7 +270,7 @@ test.serial('errors properly output to console', async t => {
   };
   requestedPackages = [];
   const nonGreenPackages: string[] = [];
-  const checker = new LicenseChecker({});
+  const checker = new LicenseChecker();
   checker.setDefaultHandlers();
   await checker.checkRemotePackage('foo');
   console.log = realConsoleLog;
