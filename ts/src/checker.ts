@@ -86,7 +86,7 @@ export class LicenseChecker extends EventEmitter {
   // List of license names that are not SPDX-conforming IDs but are allowed.
   private whitelistedLicenses: string[] = [];
 
-  constructor({dev = false, verbose = false}: LicenseCheckerOptions) {
+  constructor({dev = false, verbose = false}: LicenseCheckerOptions = {}) {
     super();
     this.opts = {dev, verbose};
   }
