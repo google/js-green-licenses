@@ -1,5 +1,6 @@
 # JavaScript package.json License Checker
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/google/js-green-licenses.svg)](https://greenkeeper.io/)
 [![NPM Version][npm-image]][npm-url]
 [![CircleCI][circle-image]][circle-url]
 [![Dependency Status][david-image]][david-url]
