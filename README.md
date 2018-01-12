@@ -1,12 +1,12 @@
 # JavaScript package.json License Checker
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/google/js-green-licenses.svg)](https://greenkeeper.io/)
 [![NPM Version][npm-image]][npm-url]
 [![CircleCI][circle-image]][circle-url]
 [![Dependency Status][david-image]][david-url]
 [![devDependency Status][david-dev-image]][david-dev-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![codecov][codecov-image]][codecov-url]
+[![Greenkeeper badge](https://badges.greenkeeper.io/google/js-green-licenses.svg)](https://greenkeeper.io/)
 
 **This is not an official Google product.**
 
@@ -158,8 +158,8 @@ Note that comments are allowed in `js-green-licenses.json`.
 
 The configuration file must be located in the top-level directory of a
 repository for `--local` and `--pr`. When checking remote NPM packages,
-`jsgl` tries to find the location file in the current local directory from
-which `jsgl` is invoked.
+`jsgl` tries to locate the configuration file in the current local directory
+from which `jsgl` is invoked.
 
 It is desirable that the license names in the `greenLicenses` section be
 valid license IDs defined in https://spdx.org/licenses/ whenever possible.
