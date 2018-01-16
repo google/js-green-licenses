@@ -14,6 +14,10 @@ This is a tool for checking the license of JavaScript projects. It scans the
 `package.json` file to check its license and recursively checks all of its
 dependencies.
 
+**DISCLAIMER: This tool is NOT a replacement for legal advice or due
+diligence for your project's license validity. We recommend you consult a
+lawyer if you want legal advice.**
+
 ## Installation
 
 ```shell
