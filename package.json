@@ -66,7 +66,7 @@
     "@types/spdx-correct": "^2.0.0",
     "@types/spdx-satisfies": "^0.1.0",
     "@types/strip-json-comments": "0.0.30",
-    "ava": "^0.24.0",
+    "ava": "^0.25.0",
     "codecov": "^3.0.0",
     "gts": "^0.5.3",
     "mock-fs": "^4.4.2",
