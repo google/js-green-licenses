@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import test from 'ava';
-import * as mockFs from 'mock-fs';
+import mockFs from 'mock-fs';
 
 import {PackageJson} from '../src/package-json-file';
 

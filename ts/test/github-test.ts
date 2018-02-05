@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as ava from 'ava';
-import * as nock from 'nock';
+import nock from 'nock';
 import {GitHubRepository} from '../src/github';
 
 function contextualize<T>(getContext: () => T): ava.RegisterContextual<T> {
