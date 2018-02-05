@@ -14,18 +14,17 @@
 
 import {EventEmitter} from 'events';
 import * as fs from 'fs';
-import * as npmPackageArg from 'npm-package-arg';
+import npmPackageArg from 'npm-package-arg';
+import packageJson from 'package-json';
 import * as path from 'path';
-import * as pify from 'pify';
+import pify from 'pify';
+import spdxCorrect from 'spdx-correct';
+import spdxSatisfies from 'spdx-satisfies';
 import {inspect} from 'util';
 
 import * as config from './config';
 import {GitHubRepository} from './github';
 import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file';
-
-import packageJson = require('package-json');
-import spdxCorrect = require('spdx-correct');
-import spdxSatisfies = require('spdx-satisfies');
 
 export {GitHubRepository} from './github';
 
