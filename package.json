@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "argparse": "^1.0.9",
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "npm-package-arg": "^6.0.0",
     "package-json": "^4.0.1",
     "pify": "^3.0.0",
