@@ -50,7 +50,7 @@
     "npm-package-arg": "^6.0.0",
     "package-json": "^4.0.1",
     "pify": "^3.0.0",
-    "spdx-correct": "^2.0.4",
+    "spdx-correct": "^3.0.0",
     "spdx-satisfies": "^4.0.0",
     "strip-json-comments": "^2.0.1"
   },
