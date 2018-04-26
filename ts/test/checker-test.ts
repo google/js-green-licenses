@@ -19,43 +19,42 @@ import proxyquire from 'proxyquire';
 import {LicenseChecker as _LicenseChecker} from '../src/checker';
 import {PackageJson} from '../src/package-json-file';
 
-const checker = proxyquire('../src/checker', {
-  // fake packge-json
-  'package-json': (pkg: string, opts?: {version?: string}):
-      Promise<PackageJson> => {
-        if (!opts || !opts.version) {
-          throw new Error('package options or version does not exist');
-        }
-        requestedPackages.push(`${pkg}@${opts.version}`);
-        switch (pkg) {
-          case 'foo':
-            return Promise.resolve({
-              name: 'foo',
-              version: '1.2.3',
-              license: 'ISC',  // green license
-              dependencies: {
-                'bar': '^4.5.0',
-              },
-            });
-          case 'bar':
-            return Promise.resolve({
-              name: 'bar',
-              version: '4.5.6',
-              license: 'EVIL',  // non-green license
-            });
-          case 'baz':
-            return Promise.resolve({
-              name: 'baz',
-              version: '7.8.9',
-              license: 'ALSO-EVIL',  // non-green license
-            });
-          default:
-            throw new Error(`Unexpected package: ${pkg}`);
-        }
-      },
-});
-
-const LicenseChecker: typeof _LicenseChecker = checker.LicenseChecker;
+const {LicenseChecker} =
+    proxyquire<{LicenseChecker: typeof _LicenseChecker}>('../src/checker', {
+      // fake packge-json
+      'package-json': (pkg: string, opts?: {version?: string}):
+          Promise<PackageJson> => {
+            if (!opts || !opts.version) {
+              throw new Error('package options or version does not exist');
+            }
+            requestedPackages.push(`${pkg}@${opts.version}`);
+            switch (pkg) {
+              case 'foo':
+                return Promise.resolve({
+                  name: 'foo',
+                  version: '1.2.3',
+                  license: 'ISC',  // green license
+                  dependencies: {
+                    'bar': '^4.5.0',
+                  },
+                });
+              case 'bar':
+                return Promise.resolve({
+                  name: 'bar',
+                  version: '4.5.6',
+                  license: 'EVIL',  // non-green license
+                });
+              case 'baz':
+                return Promise.resolve({
+                  name: 'baz',
+                  version: '7.8.9',
+                  license: 'ALSO-EVIL',  // non-green license
+                });
+              default:
+                throw new Error(`Unexpected package: ${pkg}`);
+            }
+          },
+    });
 
 let requestedPackages: string[] = [];
 
