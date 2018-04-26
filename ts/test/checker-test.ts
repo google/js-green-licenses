@@ -14,12 +14,12 @@
 
 import test from 'ava';
 import mockFs from 'mock-fs';
+import proxyquire from 'proxyquire';
 
+import * as checker from '../src/checker';
 import {PackageJson} from '../src/package-json-file';
 
-import proxyquire = require('proxyquire');
-
-proxyquire('../src/checker', {
+const {LicenseChecker} = proxyquire<typeof checker>('../src/checker', {
   // fake packge-json
   'package-json': (pkg: string, opts?: {version?: string}):
       Promise<PackageJson> => {
@@ -54,8 +54,6 @@ proxyquire('../src/checker', {
         }
       },
 });
-
-import {LicenseChecker} from '../src/checker';
 
 let requestedPackages: string[] = [];
 
