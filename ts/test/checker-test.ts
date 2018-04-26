@@ -14,10 +14,10 @@
 
 import test from 'ava';
 import mockFs from 'mock-fs';
+import proxyquire from 'proxyquire';
 
+import {LicenseChecker as _LicenseChecker} from '../src/checker';
 import {PackageJson} from '../src/package-json-file';
-
-import proxyquire = require('proxyquire');
 
 const checker = proxyquire('../src/checker', {
   // fake packge-json
@@ -55,7 +55,6 @@ const checker = proxyquire('../src/checker', {
       },
 });
 
-import {LicenseChecker as _LicenseChecker} from '../src/checker';
 const LicenseChecker: typeof _LicenseChecker = checker.LicenseChecker;
 
 let requestedPackages: string[] = [];
