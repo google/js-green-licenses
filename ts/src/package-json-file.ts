@@ -19,7 +19,9 @@ export interface OldLicenseField {
   url?: string;
 }
 export type License = string|OldLicenseField|OldLicenseField[];
-export interface Dependencies { [pkg: string]: string; }
+export interface Dependencies {
+  [pkg: string]: string;
+}
 export interface PackageJson {
   name: string;
   version: string;
