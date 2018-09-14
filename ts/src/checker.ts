@@ -177,6 +177,26 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
+  private async sleep(timeoutSec: number) {
+    return new Promise(resolve => setTimeout(resolve, timeoutSec * 1000));
+  }
+
+  private async packageJsonWithRetry(
+      packageName: string, options: {version: string, fullMetadata: boolean}) {
+    for (const timeoutSec of [5, 30, 60, 0]) {
+      try {
+        const json = await packageJson(packageName, options);
+        return json;
+      } catch (err) {
+        if (timeoutSec === 0) {
+          throw err;
+        }
+        await this.sleep(timeoutSec);
+      }
+    }
+    throw new Error();
+  }
+
   private async checkLicenses(
       packageName: string, versionSpec: string,
       ...parents: string[]): Promise<void> {
@@ -184,7 +204,7 @@ export class LicenseChecker extends EventEmitter {
     if (this.failedPackages.has(spec)) return;
 
     try {
-      const json = await packageJson(
+      const json = await this.packageJsonWithRetry(
           packageName, {version: versionSpec, fullMetadata: true});
       await this.checkPackageJson(json, packageName, ...parents);
     } catch (err) {
