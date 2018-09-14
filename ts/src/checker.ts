@@ -183,18 +183,17 @@ export class LicenseChecker extends EventEmitter {
 
   private async packageJsonWithRetry(
       packageName: string, options: {version: string, fullMetadata: boolean}) {
+    let lastError = new Error();
     for (const timeoutSec of [5, 30, 60, 0]) {
       try {
         const json = await packageJson(packageName, options);
         return json;
       } catch (err) {
-        if (timeoutSec === 0) {
-          throw err;
-        }
+        lastError = err;
         await this.sleep(timeoutSec);
       }
     }
-    throw new Error();
+    throw lastError;
   }
 
   private async checkLicenses(
