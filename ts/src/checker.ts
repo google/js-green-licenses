@@ -68,6 +68,10 @@ export interface CheckError {
   parentPackages: string[];
 }
 
+export interface DefaultHandlerOptions {
+  setExitCode?: boolean;
+}
+
 type EventType = 'non-green-license'|'package.json'|'end'|'error';
 
 export class LicenseChecker extends EventEmitter {
@@ -352,7 +356,7 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** set default event handlers for CLI output. */
-  setDefaultHandlers(): void {
+  setDefaultHandlers(options: DefaultHandlerOptions = {}): void {
     let nonGreenCount = 0;
     let errorCount = 0;
     this.on('non-green-license',
@@ -383,7 +387,9 @@ export class LicenseChecker extends EventEmitter {
             })
         .on('end', () => {
           if (nonGreenCount > 0 || errorCount > 0) {
-            process.exitCode = 1;
+            if (options.setExitCode) {
+              process.exitCode = 1;
+            }
             if (nonGreenCount > 0) {
               console.log(`${nonGreenCount} non-green licenses found.`);
             }

@@ -254,7 +254,7 @@ test.serial('errors properly output to console', async t => {
   requestedPackages = [];
   const nonGreenPackages: string[] = [];
   const checker = new LicenseChecker();
-  checker.setDefaultHandlers();
+  checker.setDefaultHandlers({ setExitCode: false });
   await checker.checkRemotePackage('foo');
   console.log = realConsoleLog;
   t.regex(consoleOutput, /EVIL: bar@4\.5\.6/);
