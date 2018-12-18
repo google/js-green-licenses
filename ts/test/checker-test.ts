@@ -13,11 +13,11 @@
 // limitations under the License.
 
 import test from 'ava';
-import mockFs from 'mock-fs';
 import proxyquire from 'proxyquire';
 
 import * as checker from '../src/checker';
 import {PackageJson} from '../src/package-json-file';
+import {withFixtures} from './fixtures'
 
 const {LicenseChecker} = proxyquire<typeof checker>('../src/checker', {
   // fake packge-json
@@ -71,7 +71,7 @@ test.serial(
       t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
     });
 
-test.serial('local directory is checked correctly', async t => {
+test.serial('local directory is checked correctly', t => {
   const packageJson = JSON.stringify({
     name: 'hello',
     version: '1.0.0',
@@ -80,13 +80,12 @@ test.serial('local directory is checked correctly', async t => {
       foo: '^1.2.3',
     },
   });
-  mockFs({
+  return withFixtures({
     'path/to/dir': {
       'package.json': packageJson,
       'another-file': 'hello, world',
     },
-  });
-  try {
+  }, async () => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const checker = new LicenseChecker();
@@ -96,12 +95,10 @@ test.serial('local directory is checked correctly', async t => {
     await checker.checkLocalDirectory('path/to/dir');
     t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
     t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
-test.serial('local directory should have correct licenses too', async t => {
+test.serial('local directory should have correct licenses too', t => {
   const packageJson = JSON.stringify({
     name: 'hello',
     version: '1.0.0',
@@ -110,13 +107,12 @@ test.serial('local directory should have correct licenses too', async t => {
       foo: '^1.2.3',
     },
   });
-  mockFs({
+  return withFixtures({
     'path/to/dir': {
       'package.json': packageJson,
       'another-file': 'hello, world',
     },
-  });
-  try {
+  }, async () => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const checker = new LicenseChecker();
@@ -126,12 +122,10 @@ test.serial('local directory should have correct licenses too', async t => {
     await checker.checkLocalDirectory('path/to/dir');
     t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
     t.deepEqual(nonGreenPackages, ['hello@1.0.0', 'bar@4.5.6']);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
-test.serial('local monorepo directory is checked correctly', async t => {
+test.serial('local monorepo directory is checked correctly', t => {
   const topLevelPackageJson = JSON.stringify({
     name: 'hello',
     version: '1.0.0',
@@ -148,7 +142,7 @@ test.serial('local monorepo directory is checked correctly', async t => {
       baz: '^7.0.0',
     },
   });
-  mockFs({
+  return withFixtures({
     'path/to/dir': {
       'package.json': topLevelPackageJson,
       'another-file': 'hello, world',
@@ -158,8 +152,7 @@ test.serial('local monorepo directory is checked correctly', async t => {
         },
       },
     },
-  });
-  try {
+  }, async () => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const packageJsonPaths: string[] = [];
@@ -179,12 +172,10 @@ test.serial('local monorepo directory is checked correctly', async t => {
       'path/to/dir/package.json',
       'path/to/dir/packages/sub-package/package.json',
     ]);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
-test.serial('package whitelist should be respected (local repo)', async t => {
+test.serial('package whitelist should be respected (local repo)', t => {
   const packageJson = JSON.stringify({
     name: 'hello',
     version: '1.0.0',
@@ -198,13 +189,12 @@ test.serial('package whitelist should be respected (local repo)', async t => {
       'bar',
     ],
   });
-  mockFs({
+  return withFixtures({
     'path/to/dir': {
       'package.json': packageJson,
       'js-green-licenses.json': configJson,
     },
-  });
-  try {
+  }, async () => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const checker = new LicenseChecker();
@@ -213,13 +203,11 @@ test.serial('package whitelist should be respected (local repo)', async t => {
     });
     await checker.checkLocalDirectory('path/to/dir');
     t.is(nonGreenPackages.length, 0);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
 
-test.serial('custom green license list (local repo)', async t => {
+test.serial('custom green license list (local repo)', t => {
   const packageJson = JSON.stringify({
     name: 'hello',
     version: '1.0.0',
@@ -234,13 +222,12 @@ test.serial('custom green license list (local repo)', async t => {
       'EVIL',
     ],
   });
-  mockFs({
+  return withFixtures({
     'path/to/dir': {
       'package.json': packageJson,
       'js-green-licenses.json': configJson,
     },
-  });
-  try {
+  }, async () => {
     requestedPackages = [];
     const nonGreenPackages: string[] = [];
     const checker = new LicenseChecker();
@@ -250,9 +237,7 @@ test.serial('custom green license list (local repo)', async t => {
     await checker.checkLocalDirectory('path/to/dir');
     t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
     t.deepEqual(nonGreenPackages, ['foo@1.2.3']);  // ISC is not green now.
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
 test.serial('errors properly output to console', async t => {

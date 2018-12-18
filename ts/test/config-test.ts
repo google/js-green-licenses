@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import test from 'ava';
-import mockFs from 'mock-fs';
 
 import * as config from '../src/config';
 import {GitHubRepository} from '../src/github';
+import { withFixtures } from './fixtures';
 
-test.serial('read correct contents from local config file', async (t) => {
+test.serial('read correct contents from local config file', t => {
   const configContent = JSON.stringify({
     greenLicenses: [
       'FOO',
@@ -29,20 +29,19 @@ test.serial('read correct contents from local config file', async (t) => {
       'another-package',
     ],
   });
-  mockFs({
+
+  return withFixtures({
     'repo/directory': {
-      'js-green-licenses.json': configContent,
-    },
-  });
-  try {
+      'js-green-licenses.json': configContent
+    }
+  }, async () => {
     const cfg = await config.getLocalConfig('repo/directory');
     t.truthy(cfg);
     t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
     t.deepEqual(cfg!.packageWhitelist, ['a-package', 'another-package']);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
+
 
 test.serial('read config file from github repo', async (t) => {
   class FakeGitHubRepository extends GitHubRepository {
@@ -70,16 +69,13 @@ test.serial('read config file from github repo', async (t) => {
   t.deepEqual(cfg!.packageWhitelist, ['package-1', 'package-2']);
 });
 
-test.serial('no config file is ok (local)', async (t) => {
-  mockFs({
-    'repo/directory': {},
-  });
-  try {
+test.serial('no config file is ok (local)', t => {
+  return withFixtures({
+    'repo/directory': {}
+  }, async () => {
     const cfg = await config.getLocalConfig('repo/directory');
     t.is(cfg, null);
-  } finally {
-    mockFs.restore();
-  }
+  });
 });
 
 test.serial('no config file is ok (github)', async (t) => {
@@ -97,7 +93,7 @@ test.serial('no config file is ok (github)', async (t) => {
   t.is(cfg, null);
 });
 
-test.serial('error for invalid config file (local)', async (t) => {
+test.serial('error for invalid config file (local)', t => {
   const configContent = JSON.stringify({
     // must be an array of strings.
     packageWhitelist: [
@@ -105,25 +101,25 @@ test.serial('error for invalid config file (local)', async (t) => {
       43,
     ],
   });
-  mockFs({
+  return withFixtures({
     'repo/directory': {
       'js-green-licenses.json': configContent,
-    },
-  });
-  const consoleError = console.error;
-  try {
-    let errorContents = '';
-    console.error = (message, ...params) => {
-      errorContents = `${message} ${params.join(' ')}`;
-      consoleError(message, ...params);
-    };
-    const cfg = await config.getLocalConfig('repo/directory');
-    t.is(cfg, null);
-    t.true(errorContents.indexOf('Invalid config contents') >= 0);
-  } finally {
-    console.error = consoleError;
-    mockFs.restore();
-  }
+    }
+  }, async () => {
+    const consoleError = console.error;
+    try {
+      let errorContents = '';
+      console.error = (message, ...params) => {
+        errorContents = `${message} ${params.join(' ')}`;
+        consoleError(message, ...params);
+      };
+      const cfg = await config.getLocalConfig('repo/directory');
+      t.is(cfg, null);
+      t.true(errorContents.indexOf('Invalid config contents') >= 0);
+    } finally {
+      console.error = consoleError;
+    }
+  })
 });
 
 test.serial('error for invalid config file (github)', async (t) => {
@@ -160,7 +156,7 @@ test.serial('error for invalid config file (github)', async (t) => {
   }
 });
 
-test.serial('comments are allowed in config file', async (t) => {
+test.serial('comments are allowed in config file', t => {
   const configContent = `{
     // comments are fine
     "greenLicenses": [
@@ -173,17 +169,14 @@ test.serial('comments are allowed in config file', async (t) => {
       "bar"
     ]
   }`;
-  mockFs({
+  return withFixtures({
     'repo/directory': {
       'js-green-licenses.json': configContent,
     },
-  });
-  try {
+  }, async () => {
     const cfg = await config.getLocalConfig('repo/directory');
     t.truthy(cfg);
     t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
     t.deepEqual(cfg!.packageWhitelist, ['foo', 'bar']);
-  } finally {
-    mockFs.restore();
-  }
-});
+  });
+})
