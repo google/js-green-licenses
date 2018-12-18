@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-// Copied from https://github.com/google/ts-style/blob/1eb4ad4e61622c0c65fc8a02d4295667873bf440/test/fixtures.ts
+// Copied from
+// https://github.com/google/ts-style/blob/1eb4ad4e61622c0c65fc8a02d4295667873bf440/test/fixtures.ts
 // TODO: extract to a standalone module.
 
 import * as fs from 'fs';
@@ -29,7 +30,7 @@ export interface Fixtures {
   // If string, we create a file with that string contents. If fixture, we
   // create a subdirectory and recursively install the fixture.
   // TODO: support buffers to allow non-text files.
-  [name: string]: string | Fixtures;
+  [name: string]: string|Fixtures;
 }
 
 async function setupFixtures(dir: string, fixtures: Fixtures) {
@@ -48,9 +49,7 @@ async function setupFixtures(dir: string, fixtures: Fixtures) {
 }
 
 export async function withFixtures(
-  fixtures: Fixtures,
-  fn: (fixturesDir: string) => PromiseLike<void>
-) {
+    fixtures: Fixtures, fn: (fixturesDir: string) => PromiseLike<void>) {
   const keep = !!process.env.GTS_KEEP_TEMPDIRS;
   const dir = tmp.dirSync({keep, unsafeCleanup: true});
 

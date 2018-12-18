@@ -16,7 +16,7 @@ import test from 'ava';
 
 import * as config from '../src/config';
 import {GitHubRepository} from '../src/github';
-import { withFixtures } from './fixtures';
+import {withFixtures} from './fixtures';
 
 test.serial('read correct contents from local config file', t => {
   const configContent = JSON.stringify({
@@ -30,16 +30,14 @@ test.serial('read correct contents from local config file', t => {
     ],
   });
 
-  return withFixtures({
-    'repo/directory': {
-      'js-green-licenses.json': configContent
-    }
-  }, async () => {
-    const cfg = await config.getLocalConfig('repo/directory');
-    t.truthy(cfg);
-    t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
-    t.deepEqual(cfg!.packageWhitelist, ['a-package', 'another-package']);
-  });
+  return withFixtures(
+      {'repo/directory': {'js-green-licenses.json': configContent}},
+      async () => {
+        const cfg = await config.getLocalConfig('repo/directory');
+        t.truthy(cfg);
+        t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
+        t.deepEqual(cfg!.packageWhitelist, ['a-package', 'another-package']);
+      });
 });
 
 
@@ -70,9 +68,7 @@ test.serial('read config file from github repo', async (t) => {
 });
 
 test.serial('no config file is ok (local)', t => {
-  return withFixtures({
-    'repo/directory': {}
-  }, async () => {
+  return withFixtures({'repo/directory': {}}, async () => {
     const cfg = await config.getLocalConfig('repo/directory');
     t.is(cfg, null);
   });
@@ -101,25 +97,27 @@ test.serial('error for invalid config file (local)', t => {
       43,
     ],
   });
-  return withFixtures({
-    'repo/directory': {
-      'js-green-licenses.json': configContent,
-    }
-  }, async () => {
-    const consoleError = console.error;
-    try {
-      let errorContents = '';
-      console.error = (message, ...params) => {
-        errorContents = `${message} ${params.join(' ')}`;
-        consoleError(message, ...params);
-      };
-      const cfg = await config.getLocalConfig('repo/directory');
-      t.is(cfg, null);
-      t.true(errorContents.indexOf('Invalid config contents') >= 0);
-    } finally {
-      console.error = consoleError;
-    }
-  })
+  return withFixtures(
+      {
+        'repo/directory': {
+          'js-green-licenses.json': configContent,
+        }
+      },
+      async () => {
+        const consoleError = console.error;
+        try {
+          let errorContents = '';
+          console.error = (message, ...params) => {
+            errorContents = `${message} ${params.join(' ')}`;
+            consoleError(message, ...params);
+          };
+          const cfg = await config.getLocalConfig('repo/directory');
+          t.is(cfg, null);
+          t.true(errorContents.indexOf('Invalid config contents') >= 0);
+        } finally {
+          console.error = consoleError;
+        }
+      });
 });
 
 test.serial('error for invalid config file (github)', async (t) => {
@@ -169,14 +167,16 @@ test.serial('comments are allowed in config file', t => {
       "bar"
     ]
   }`;
-  return withFixtures({
-    'repo/directory': {
-      'js-green-licenses.json': configContent,
-    },
-  }, async () => {
-    const cfg = await config.getLocalConfig('repo/directory');
-    t.truthy(cfg);
-    t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
-    t.deepEqual(cfg!.packageWhitelist, ['foo', 'bar']);
-  });
-})
+  return withFixtures(
+      {
+        'repo/directory': {
+          'js-green-licenses.json': configContent,
+        },
+      },
+      async () => {
+        const cfg = await config.getLocalConfig('repo/directory');
+        t.truthy(cfg);
+        t.deepEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
+        t.deepEqual(cfg!.packageWhitelist, ['foo', 'bar']);
+      });
+});
