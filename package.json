@@ -51,7 +51,7 @@
     "package-json": "^5.0.0",
     "pify": "^4.0.0",
     "spdx-correct": "^3.0.0",
-    "spdx-satisfies": "^4.0.0",
+    "spdx-satisfies": "^5.0.0",
     "strip-json-comments": "^2.0.1"
   },
   "devDependencies": {
