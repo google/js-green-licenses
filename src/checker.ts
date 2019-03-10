@@ -14,12 +14,12 @@
 
 import {EventEmitter} from 'events';
 import * as fs from 'fs';
-import npmPackageArg from 'npm-package-arg';
-import packageJson from 'package-json';
+import * as npmPackageArg from 'npm-package-arg';
+import * as packageJson from 'package-json';
 import * as path from 'path';
-import pify from 'pify';
-import spdxCorrect from 'spdx-correct';
-import spdxSatisfies from 'spdx-satisfies';
+import * as pify from 'pify';
+import spdxCorrect = require('spdx-correct');
+import spdxSatisfies = require('spdx-satisfies');
 import {inspect} from 'util';
 
 import * as config from './config';

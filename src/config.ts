@@ -14,9 +14,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import pify from 'pify';
-import stripJsonComments from 'strip-json-comments';
-
+import * as pify from 'pify';
+import * as stripJsonComments from 'strip-json-comments';
 import {GitHubRepository} from './github';
 
 const fsReadFile = pify(fs.readFile);

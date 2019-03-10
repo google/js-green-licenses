@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import test from 'ava';
-import nock from 'nock';
+import * as nock from 'nock';
 import {GitHubRepository} from '../src/github';
 
 interface WithRepo {

@@ -15,10 +15,9 @@
 // limitations under the License.
 
 import {ArgumentParser} from 'argparse';
+import {LicenseChecker} from './checker';
 
-import {LicenseChecker, NonGreenLicense} from './checker';
-
-const version = require('../../package.json').version;
+const {version} = require('../../package.json');
 
 const argParser = new ArgumentParser({
   version,

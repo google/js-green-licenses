@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import test from 'ava';
-import proxyquire from 'proxyquire';
+import * as proxyquire from 'proxyquire';
 
 import * as checker from '../src/checker';
 import {PackageJson} from '../src/package-json-file';

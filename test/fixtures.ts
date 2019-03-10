@@ -21,7 +21,7 @@
 import * as fs from 'fs';
 import makeDir from 'make-dir';
 import * as path from 'path';
-import pify from 'pify';
+import * as pify from 'pify';
 import * as tmp from 'tmp';
 
 const writeFilep = pify(fs.writeFile);

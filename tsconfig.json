@@ -1,15 +1,11 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "rootDir": "ts",
-    "outDir": "build",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "rootDir": ".",
+    "outDir": "build"
   },
   "include": [
-    "ts/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
+    "src/**/*.ts",
+    "test/**/*.ts"
   ]
 }
