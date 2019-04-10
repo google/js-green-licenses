@@ -26,6 +26,9 @@
     "posttest": "npm run check && npm run check-self",
     "check-self": "node build/src/cli.js --local ."
   },
+  "engines": {
+    "node": ">= 8.x"
+  },
   "keywords": [
     "npm",
     "package",
