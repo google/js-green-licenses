@@ -17,10 +17,9 @@ import * as fs from 'fs';
 import npmPackageArg from 'npm-package-arg';
 import packageJson from 'package-json';
 import * as path from 'path';
-import pify from 'pify';
 import spdxCorrect from 'spdx-correct';
 import spdxSatisfies from 'spdx-satisfies';
-import {inspect} from 'util';
+import {inspect, promisify} from 'util';
 
 import * as config from './config';
 import {GitHubRepository} from './github';
@@ -28,9 +27,9 @@ import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file'
 
 export {GitHubRepository} from './github';
 
-const fsAccess = pify(fs.access);
-const fsReadDir = pify(fs.readdir);
-const fsReadFile = pify(fs.readFile);
+const fsAccess = promisify(fs.access);
+const fsReadDir = promisify(fs.readdir);
+const fsReadFile = promisify(fs.readFile);
 
 // Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
 // possible. When adding new licenses, please consult the relevant documents.
