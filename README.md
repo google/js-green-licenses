@@ -3,10 +3,9 @@
 [![NPM Version][npm-image]][npm-url]
 [![CircleCI][circle-image]][circle-url]
 [![Dependency Status][david-image]][david-url]
-[![devDependency Status][david-dev-image]][david-dev-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![codecov][codecov-image]][codecov-url]
-[![Greenkeeper badge](https://badges.greenkeeper.io/google/js-green-licenses.svg)](https://greenkeeper.io/)
+[![Code Style: Google][gts-image]][gts-url]
 
 **This is not an official Google product.**
 
@@ -309,14 +308,14 @@ A `LicenseChecker` object emits following events during its processing.
     }
     ```
 
-[circle-image]: https://circleci.com/gh/google/js-green-licenses.svg?style=svg
+[circle-image]: https://circleci.com/gh/google/js-green-licenses.svg?style=shield
 [circle-url]: https://circleci.com/gh/google/js-green-licenses
 [codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/google/js-green-licenses
-[david-dev-image]: https://david-dm.org/google/js-green-licenses/dev-status.svg
-[david-dev-url]: https://david-dm.org/google/js-green-licenses?type=dev
 [david-image]: https://david-dm.org/google/js-green-licenses.svg
 [david-url]: https://david-dm.org/google/js-green-licenses
+[gts-image]: https://img.shields.io/badge/code%20style-google-blueviolet.svg
+[gts-url]: https://github.com/google/gts
 [npm-image]: https://img.shields.io/npm/v/js-green-licenses.svg
 [npm-url]: https://npmjs.org/package/js-green-licenses
 [snyk-image]: https://snyk.io/test/github/google/js-green-licenses/badge.svg
