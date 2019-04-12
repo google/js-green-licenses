@@ -14,12 +14,12 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import pify from 'pify';
 import stripJsonComments from 'strip-json-comments';
+import {promisify} from 'util';
 
 import {GitHubRepository} from './github';
 
-const fsReadFile = pify(fs.readFile);
+const fsReadFile = promisify(fs.readFile);
 
 const CONFIG_FILE_NAME = 'js-green-licenses.json';
 

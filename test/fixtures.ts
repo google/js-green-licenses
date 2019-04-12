@@ -21,10 +21,10 @@
 import * as fs from 'fs';
 import makeDir from 'make-dir';
 import * as path from 'path';
-import pify from 'pify';
 import * as tmp from 'tmp';
+import {promisify} from 'util';
 
-const writeFilep = pify(fs.writeFile);
+const writeFilep = promisify(fs.writeFile);
 
 export interface Fixtures {
   // If string, we create a file with that string contents. If fixture, we
