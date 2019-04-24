@@ -52,12 +52,16 @@ argParser.addArgument(['--verbose'], {
   help: 'Verbose error outputs.',
   nargs: 0,
 });
+argParser.addArgument(['--fail'], {
+  help: 'Exit with code 1 if a non-green license found',
+  nargs: 0,
+});
 const args = argParser.parseArgs();
 
 async function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
-  checker.setDefaultHandlers();
+  checker.setDefaultHandlers({setExitCode: !!args.fail});
   if (args.local) {
     await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
