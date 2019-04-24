@@ -138,7 +138,12 @@ export class LicenseChecker extends EventEmitter {
     // https://docs.npmjs.com/files/package.json#license for details. The code
     // below is a little complicated to deal with those cases.
     const license = pkgJson.license || pkgJson.licenses;
-    if (!license) return null;
+    if (!license) {
+      if (pkgJson.private) {
+        return 'private';
+      }
+      return null;
+    }
     if (typeof license === 'string') return license;
     if (Array.isArray(license)) {
       const types = license.map(x => x.type).filter(x => !!x);

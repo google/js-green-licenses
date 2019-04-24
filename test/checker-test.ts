@@ -271,3 +271,67 @@ test.serial('errors properly output to console', async t => {
   t.regex(consoleOutput, /EVIL: bar@4\.5\.6/);
   t.regex(consoleOutput, /1 non-green licenses found\./);
 });
+
+test.serial('accept private package (local repo)', t => {
+  const packageJson = JSON.stringify({
+    private: true,
+    dependencies: {
+
+    },
+  });
+  const configJson = JSON.stringify({
+    greenLicenses: [
+      'private',
+    ],
+  });
+  return withFixtures(
+      {
+        'path/to/dir': {
+          'package.json': packageJson,
+          'js-green-licenses.json': configJson,
+        },
+      },
+      async () => {
+        requestedPackages = [];
+        const nonGreenPackages: string[] = [];
+        const checker = new LicenseChecker();
+        checker.on('non-green-license', arg => {
+          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+        });
+        await checker.checkLocalDirectory('path/to/dir');
+        t.deepEqual(requestedPackages, []);
+        t.deepEqual(nonGreenPackages, []);
+      });
+});
+
+test.serial('decline private package (local repo)', t => {
+  const packageJson = JSON.stringify({
+    private: true,
+    dependencies: {
+
+    },
+  });
+  const configJson = JSON.stringify({
+    greenLicenses: [
+      'ISC',
+    ],
+  });
+  return withFixtures(
+      {
+        'path/to/dir': {
+          'package.json': packageJson,
+          'js-green-licenses.json': configJson,
+        },
+      },
+      async () => {
+        requestedPackages = [];
+        const nonGreenPackages: string[] = [];
+        const checker = new LicenseChecker();
+        checker.on('non-green-license', arg => {
+          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+        });
+        await checker.checkLocalDirectory('path/to/dir');
+        t.deepEqual(requestedPackages, []);
+        t.deepEqual(nonGreenPackages, ['undefined@undefined']);
+      });
+});
