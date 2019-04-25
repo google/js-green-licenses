@@ -25,6 +25,7 @@ export interface Dependencies {
 export interface PackageJson {
   name: string;
   version: string;
+  private?: boolean;
   license?: License;
   licenses?: License;
   dependencies?: Dependencies;
@@ -54,9 +55,10 @@ function isDependencies(obj: any): obj is Dependencies {
 
 function isPackageJson(obj: {}): obj is PackageJson {
   const json = obj as PackageJson;
-  return typeof json.name === 'string' && typeof json.version === 'string' &&
-      (json.license === undefined || isLicense(json.license)) &&
-      (json.licenses === undefined || isLicense(json.licenses)) &&
+  return (typeof json.private === 'boolean' && json.private) ||
+      (typeof json.name === 'string' && typeof json.version === 'string' &&
+       (json.license === undefined || isLicense(json.license)) &&
+       (json.licenses === undefined || isLicense(json.licenses))) &&
       (json.dependencies === undefined || isDependencies(json.dependencies)) &&
       (json.devDependencies === undefined ||
        isDependencies(json.devDependencies));
