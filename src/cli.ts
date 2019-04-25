@@ -57,7 +57,7 @@ const args = argParser.parseArgs();
 async function main(): Promise<void> {
   const checker =
       new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
-  checker.setDefaultHandlers();
+  checker.setDefaultHandlers({setExitCode: true});
   if (args.local) {
     await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
