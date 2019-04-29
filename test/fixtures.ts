@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import makeDir from 'make-dir';
 import * as path from 'path';
 import * as tmp from 'tmp';
-import {promisify} from 'util';
+import { promisify } from 'util';
 
 const writeFilep = promisify(fs.writeFile);
 
@@ -30,7 +30,7 @@ export interface Fixtures {
   // If string, we create a file with that string contents. If fixture, we
   // create a subdirectory and recursively install the fixture.
   // TODO: support buffers to allow non-text files.
-  [name: string]: string|Fixtures;
+  [name: string]: string | Fixtures;
 }
 
 async function setupFixtures(dir: string, fixtures: Fixtures) {
@@ -49,9 +49,11 @@ async function setupFixtures(dir: string, fixtures: Fixtures) {
 }
 
 export async function withFixtures(
-    fixtures: Fixtures, fn: (fixturesDir: string) => PromiseLike<void>) {
+  fixtures: Fixtures,
+  fn: (fixturesDir: string) => PromiseLike<void>
+) {
   const keep = !!process.env.GTS_KEEP_TEMPDIRS;
-  const dir = tmp.dirSync({keep, unsafeCleanup: true});
+  const dir = tmp.dirSync({ keep, unsafeCleanup: true });
 
   await setupFixtures(dir.name, fixtures);
 

@@ -14,9 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ArgumentParser} from 'argparse';
+import { ArgumentParser } from 'argparse';
 
-import {LicenseChecker, NonGreenLicense} from './checker';
+import { LicenseChecker, NonGreenLicense } from './checker';
 
 const version = require('../../package.json').version;
 
@@ -26,8 +26,9 @@ const argParser = new ArgumentParser({
   description: 'License checker for npm modules',
 });
 argParser.addArgument(['package'], {
-  help: 'Package name to check license for. ' +
-      'Can include version spec after @. E.g. foo@^1.2.3. Otherwise latest.',
+  help:
+    'Package name to check license for. ' +
+    'Can include version spec after @. E.g. foo@^1.2.3. Otherwise latest.',
   metavar: '<package or package@version>',
   type: 'string',
   nargs: '?',
@@ -55,14 +56,16 @@ argParser.addArgument(['--verbose'], {
 const args = argParser.parseArgs();
 
 async function main(): Promise<void> {
-  const checker =
-      new LicenseChecker({dev: !!args.dev, verbose: !!args.verbose});
-  checker.setDefaultHandlers({setExitCode: true});
+  const checker = new LicenseChecker({
+    dev: !!args.dev,
+    verbose: !!args.verbose,
+  });
+  checker.setDefaultHandlers({ setExitCode: true });
   if (args.local) {
     await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
-    const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
-    const {mergeCommitSha} = await repo.getPRCommits(prId);
+    const { repo, prId } = checker.prPathToGitHubRepoAndId(args.pr[0]);
+    const { mergeCommitSha } = await repo.getPRCommits(prId);
     await checker.checkGitHubPR(repo, mergeCommitSha);
   } else if (args.package) {
     await checker.checkRemotePackage(args.package);
@@ -71,6 +74,6 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error(err);
 });

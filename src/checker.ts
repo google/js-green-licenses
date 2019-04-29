@@ -12,20 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {EventEmitter} from 'events';
+import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import npmPackageArg from 'npm-package-arg';
 import packageJson from 'package-json';
 import * as path from 'path';
 import spdxCorrect from 'spdx-correct';
 import spdxSatisfies from 'spdx-satisfies';
-import {inspect, promisify} from 'util';
+import { inspect, promisify } from 'util';
 
 import * as config from './config';
-import {GitHubRepository} from './github';
-import {Dependencies, ensurePackageJson, PackageJson} from './package-json-file';
+import { GitHubRepository } from './github';
+import {
+  Dependencies,
+  ensurePackageJson,
+  PackageJson,
+} from './package-json-file';
 
-export {GitHubRepository} from './github';
+export { GitHubRepository } from './github';
 
 const fsAccess = promisify(fs.access);
 const fsReadDir = promisify(fs.readdir);
@@ -34,28 +38,62 @@ const fsReadFile = promisify(fs.readFile);
 // Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
 // possible. When adding new licenses, please consult the relevant documents.
 const DEFAULT_GREEN_LICENSES = [
-  'AFL-2.1',      'AFL-3.0',      'APSL-2.0',     'Apache-1.1',   'Apache-2.0',
-  'Artistic-1.0', 'Artistic-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'BSL-1.0',
-  'CC-BY-1.0',    'CC-BY-2.0',    'CC-BY-2.5',    'CC-BY-3.0',    'CC-BY-4.0',
-  'CC0-1.0',      'CDDL-1.0',     'CDDL-1.1',     'CPL-1.0',      'EPL-1.0',
-  'FTL',          'IPL-1.0',      'ISC',          'LGPL-2.0',     'LGPL-2.1',
-  'LGPL-3.0',     'LPL-1.02',     'MIT',          'MPL-1.0',      'MPL-1.1',
-  'MPL-2.0',      'MS-PL',        'NCSA',         'OpenSSL',      'PHP-3.0',
-  'Ruby',         'Unlicense',    'W3C',          'Xnet',         'ZPL-2.0',
-  'Zend-2.0',     'Zlib',         'libtiff',
+  'AFL-2.1',
+  'AFL-3.0',
+  'APSL-2.0',
+  'Apache-1.1',
+  'Apache-2.0',
+  'Artistic-1.0',
+  'Artistic-2.0',
+  'BSD-2-Clause',
+  'BSD-3-Clause',
+  'BSL-1.0',
+  'CC-BY-1.0',
+  'CC-BY-2.0',
+  'CC-BY-2.5',
+  'CC-BY-3.0',
+  'CC-BY-4.0',
+  'CC0-1.0',
+  'CDDL-1.0',
+  'CDDL-1.1',
+  'CPL-1.0',
+  'EPL-1.0',
+  'FTL',
+  'IPL-1.0',
+  'ISC',
+  'LGPL-2.0',
+  'LGPL-2.1',
+  'LGPL-3.0',
+  'LPL-1.02',
+  'MIT',
+  'MPL-1.0',
+  'MPL-1.1',
+  'MPL-2.0',
+  'MS-PL',
+  'NCSA',
+  'OpenSSL',
+  'PHP-3.0',
+  'Ruby',
+  'Unlicense',
+  'W3C',
+  'Xnet',
+  'ZPL-2.0',
+  'Zend-2.0',
+  'Zlib',
+  'libtiff',
 ];
 
 // options for constructing LicenseChecker
 export interface LicenseCheckerOptions {
-  dev?: boolean;      // also check devDependencies
-  verbose?: boolean;  // verbose error outputs
+  dev?: boolean; // also check devDependencies
+  verbose?: boolean; // verbose error outputs
 }
 
 // argument for 'non-green-license' event from LicenseChecker
 export interface NonGreenLicense {
   packageName: string;
   version: string;
-  licenseName: string|null;
+  licenseName: string | null;
   parentPackages: string[];
 }
 
@@ -71,7 +109,7 @@ export interface DefaultHandlerOptions {
   setExitCode?: boolean;
 }
 
-type EventType = 'non-green-license'|'package.json'|'end'|'error';
+type EventType = 'non-green-license' | 'package.json' | 'end' | 'error';
 
 export class LicenseChecker extends EventEmitter {
   // Cache for packageName@version's that are already processed.
@@ -86,13 +124,15 @@ export class LicenseChecker extends EventEmitter {
   // List of license names that are not SPDX-conforming IDs but are allowed.
   private whitelistedLicenses: string[] = [];
 
-  constructor({dev = false, verbose = false}: LicenseCheckerOptions = {}) {
+  constructor({ dev = false, verbose = false }: LicenseCheckerOptions = {}) {
     super();
-    this.opts = {dev, verbose};
+    this.opts = { dev, verbose };
   }
 
-  on(event: 'non-green-license',
-     listener: (arg: NonGreenLicense) => void): this;
+  on(
+    event: 'non-green-license',
+    listener: (arg: NonGreenLicense) => void
+  ): this;
   // 'package.json' events are not emitted for remote packages.
   on(event: 'package.json', listener: (filePath: string) => void): this;
   on(event: 'end', listener: () => void): this;
@@ -111,7 +151,7 @@ export class LicenseChecker extends EventEmitter {
     return super.emit(event, ...args);
   }
 
-  private init(cfg: config.Config|null): void {
+  private init(cfg: config.Config | null): void {
     this.config = cfg || {};
 
     const greenLicenses = this.config.greenLicenses || DEFAULT_GREEN_LICENSES;
@@ -132,7 +172,7 @@ export class LicenseChecker extends EventEmitter {
     this.failedPackages.clear();
   }
 
-  private getLicense(pkgJson: PackageJson): string|null {
+  private getLicense(pkgJson: PackageJson): string | null {
     // Some package.json files have incorrect license fields, and old packages
     // may have legacy licence field format. See
     // https://docs.npmjs.com/files/package.json#license for details. The code
@@ -152,7 +192,7 @@ export class LicenseChecker extends EventEmitter {
     return license.type || null;
   }
 
-  private correctLicenseName(license: string): string|null {
+  private correctLicenseName(license: string): string | null {
     const corrected = spdxCorrect(license);
     if (this.opts.verbose && corrected && corrected !== license) {
       console.warn(`Correcting ${license} to ${corrected}`);
@@ -161,17 +201,19 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private isPackageWhitelisted(packageName: string): boolean {
-    return !!this.config.packageWhitelist &&
-        this.config.packageWhitelist.some((p) => p === packageName);
+    return (
+      !!this.config.packageWhitelist &&
+      this.config.packageWhitelist.some(p => p === packageName)
+    );
   }
 
-  private isGreenLicense(license: string|null): boolean {
+  private isGreenLicense(license: string | null): boolean {
     if (!license) return false;
 
     const correctedName = this.correctLicenseName(license);
     // `license` is not a valid or correctable SPDX id. Check the whitelist.
     if (!correctedName) {
-      return this.whitelistedLicenses.some((l) => l === license);
+      return this.whitelistedLicenses.some(l => l === license);
     }
 
     try {
@@ -186,14 +228,18 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private async checkLicenses(
-      packageName: string, versionSpec: string,
-      ...parents: string[]): Promise<void> {
+    packageName: string,
+    versionSpec: string,
+    ...parents: string[]
+  ): Promise<void> {
     const spec = `${packageName}@${versionSpec}`;
     if (this.failedPackages.has(spec)) return;
 
     try {
-      const json = await packageJson(
-          packageName, {version: versionSpec, fullMetadata: true});
+      const json = await packageJson(packageName, {
+        version: versionSpec,
+        fullMetadata: true,
+      });
       await this.checkPackageJson(json, packageName, ...parents);
     } catch (err) {
       this.failedPackages.add(spec);
@@ -207,7 +253,9 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private async checkLicensesForDeps(
-      deps: Dependencies|undefined, ...parents: string[]): Promise<void> {
+    deps: Dependencies | undefined,
+    ...parents: string[]
+  ): Promise<void> {
     if (!deps) return;
     for (const pkg of Object.keys(deps)) {
       const depVersion = deps[pkg];
@@ -216,14 +264,18 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private async checkPackageJson(
-      json: {}, packageName: string|null, ...parents: string[]): Promise<void> {
+    json: {},
+    packageName: string | null,
+    ...parents: string[]
+  ): Promise<void> {
     const pj: PackageJson = ensurePackageJson(json);
     if (!packageName) {
       packageName = pj.name;
     }
     if (pj.name !== packageName) {
       console.warn(
-          `Package name mismatch. Expected ${packageName}, but got ${pj.name}`);
+        `Package name mismatch. Expected ${packageName}, but got ${pj.name}`
+      );
     }
     const pkgVersion = pj.version;
     const packageAndVersion = `${packageName}@${pkgVersion}`;
@@ -245,10 +297,16 @@ export class LicenseChecker extends EventEmitter {
     }
 
     await this.checkLicensesForDeps(
-        pj.dependencies, ...parents, packageAndVersion);
+      pj.dependencies,
+      ...parents,
+      packageAndVersion
+    );
     if (this.opts.dev) {
       await this.checkLicensesForDeps(
-          pj.devDependencies, ...parents, packageAndVersion);
+        pj.devDependencies,
+        ...parents,
+        packageAndVersion
+      );
     }
   }
 
@@ -321,7 +379,7 @@ export class LicenseChecker extends EventEmitter {
     this.init(await config.getLocalConfig(process.cwd()));
     const pkgArgs = npmPackageArg(pkg);
     const pkgType = pkgArgs.type;
-    if (!['tag', 'version', 'range'].some((type) => type === pkgType)) {
+    if (!['tag', 'version', 'range'].some(type => type === pkgType)) {
       throw new Error(`Unsupported package spec: ${pkg}`);
     }
     if (!pkgArgs.name || !pkgArgs.fetchSpec) {
@@ -332,21 +390,25 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
-  prPathToGitHubRepoAndId(prPath: string):
-      {repo: GitHubRepository; prId: number;} {
+  prPathToGitHubRepoAndId(
+    prPath: string
+  ): { repo: GitHubRepository; prId: number } {
     const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
     const matched = regexp.exec(prPath);
     if (!matched) {
       throw new Error(
-          `Invalid github pull request path: ${prPath}. ` +
-          'Must be in the form <owner>/<repo>/pull/<id>.');
+        `Invalid github pull request path: ${prPath}. ` +
+          'Must be in the form <owner>/<repo>/pull/<id>.'
+      );
     }
     const [, owner, repoName, prId] = matched;
-    return {repo: new GitHubRepository(owner, repoName), prId: Number(prId)};
+    return { repo: new GitHubRepository(owner, repoName), prId: Number(prId) };
   }
 
-  async checkGitHubPR(repo: GitHubRepository, mergeCommitSha: string):
-      Promise<void> {
+  async checkGitHubPR(
+    repo: GitHubRepository,
+    mergeCommitSha: string
+  ): Promise<void> {
     this.init(await config.getGitHubConfig(repo, mergeCommitSha));
     const packageJsons = await repo.getPackageJsonFiles(mergeCommitSha);
     if (packageJsons.length === 0) {
@@ -363,46 +425,44 @@ export class LicenseChecker extends EventEmitter {
   setDefaultHandlers(options: DefaultHandlerOptions = {}): void {
     let nonGreenCount = 0;
     let errorCount = 0;
-    this.on('non-green-license',
-            ({packageName, version, licenseName, parentPackages}) => {
-              nonGreenCount++;
-              const licenseDisplay = licenseName || '(no license)';
-              const packageAndVersion = `${packageName}@${version}`;
-              console.log(`${licenseDisplay}: ${packageAndVersion}`);
-              console.log(
-                  `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
-              console.log();
-            })
-        .on('package.json',
-            (filePath) => {
-              console.log(`Checking ${filePath}...`);
-              console.log();
-            })
-        .on('error',
-            ({err, packageName, versionSpec, parentPackages}) => {
-              errorCount++;
-              const packageAndVersion = `${packageName}@${versionSpec}`;
-              console.log(`Error while checking ${packageAndVersion}:`);
-              console.log(
-                  `  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
-              console.log();
-              console.log(`${inspect(err)}`);
-              console.log();
-            })
-        .on('end', () => {
-          if (nonGreenCount > 0 || errorCount > 0) {
-            if (options.setExitCode) {
-              process.exitCode = 1;
-            }
-            if (nonGreenCount > 0) {
-              console.log(`${nonGreenCount} non-green licenses found.`);
-            }
-            if (errorCount > 0) {
-              console.log(`${errorCount} errors found.`);
-            }
-          } else {
-            console.log('All green!');
+    this.on(
+      'non-green-license',
+      ({ packageName, version, licenseName, parentPackages }) => {
+        nonGreenCount++;
+        const licenseDisplay = licenseName || '(no license)';
+        const packageAndVersion = `${packageName}@${version}`;
+        console.log(`${licenseDisplay}: ${packageAndVersion}`);
+        console.log(`  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
+        console.log();
+      }
+    )
+      .on('package.json', filePath => {
+        console.log(`Checking ${filePath}...`);
+        console.log();
+      })
+      .on('error', ({ err, packageName, versionSpec, parentPackages }) => {
+        errorCount++;
+        const packageAndVersion = `${packageName}@${versionSpec}`;
+        console.log(`Error while checking ${packageAndVersion}:`);
+        console.log(`  ${[...parentPackages, packageAndVersion].join(' -> ')}`);
+        console.log();
+        console.log(`${inspect(err)}`);
+        console.log();
+      })
+      .on('end', () => {
+        if (nonGreenCount > 0 || errorCount > 0) {
+          if (options.setExitCode) {
+            process.exitCode = 1;
           }
-        });
+          if (nonGreenCount > 0) {
+            console.log(`${nonGreenCount} non-green licenses found.`);
+          }
+          if (errorCount > 0) {
+            console.log(`${errorCount} errors found.`);
+          }
+        } else {
+          console.log('All green!');
+        }
+      });
   }
 }
