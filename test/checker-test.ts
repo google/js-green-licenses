@@ -16,60 +16,63 @@ import test from 'ava';
 import proxyquire from 'proxyquire';
 
 import * as checker from '../src/checker';
-import {PackageJson} from '../src/package-json-file';
-import {withFixtures} from './fixtures';
+import { PackageJson } from '../src/package-json-file';
+import { withFixtures } from './fixtures';
 
-const {LicenseChecker} = proxyquire<typeof checker>('../src/checker', {
+const { LicenseChecker } = proxyquire<typeof checker>('../src/checker', {
   // fake packge-json
-  'package-json': (pkg: string, opts?: {version?: string}):
-      Promise<PackageJson> => {
-        if (!opts || !opts.version) {
-          throw new Error('package options or version does not exist');
-        }
-        requestedPackages.push(`${pkg}@${opts.version}`);
-        switch (pkg) {
-          case 'foo':
-            return Promise.resolve({
-              name: 'foo',
-              version: '1.2.3',
-              license: 'ISC',  // green license
-              dependencies: {
-                'bar': '^4.5.0',
-              },
-            });
-          case 'bar':
-            return Promise.resolve({
-              name: 'bar',
-              version: '4.5.6',
-              license: 'EVIL',  // non-green license
-            });
-          case 'baz':
-            return Promise.resolve({
-              name: 'baz',
-              version: '7.8.9',
-              license: 'ALSO-EVIL',  // non-green license
-            });
-          default:
-            throw new Error(`Unexpected package: ${pkg}`);
-        }
-      },
+  'package-json': (
+    pkg: string,
+    opts?: { version?: string }
+  ): Promise<PackageJson> => {
+    if (!opts || !opts.version) {
+      throw new Error('package options or version does not exist');
+    }
+    requestedPackages.push(`${pkg}@${opts.version}`);
+    switch (pkg) {
+      case 'foo':
+        return Promise.resolve({
+          name: 'foo',
+          version: '1.2.3',
+          license: 'ISC', // green license
+          dependencies: {
+            bar: '^4.5.0',
+          },
+        });
+      case 'bar':
+        return Promise.resolve({
+          name: 'bar',
+          version: '4.5.6',
+          license: 'EVIL', // non-green license
+        });
+      case 'baz':
+        return Promise.resolve({
+          name: 'baz',
+          version: '7.8.9',
+          license: 'ALSO-EVIL', // non-green license
+        });
+      default:
+        throw new Error(`Unexpected package: ${pkg}`);
+    }
+  },
 });
 
 let requestedPackages: string[] = [];
 
 test.serial(
-    'correct packages are requested and non-green-license is emitted',
-    async t => {
-      requestedPackages = [];
-      const nonGreenPackages: string[] = [];
-      const checker = new LicenseChecker();
-      checker.on('non-green-license', arg => {
-        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-      });
-      await checker.checkRemotePackage('foo');
-      t.deepEqual(requestedPackages, ['foo@latest', 'bar@^4.5.0']);
-      t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
+  'correct packages are requested and non-green-license is emitted',
+  async t => {
+    requestedPackages = [];
+    const nonGreenPackages: string[] = [];
+    const checker = new LicenseChecker();
+    checker.on('non-green-license', arg => {
+      nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
     });
+    await checker.checkRemotePackage('foo');
+    t.deepEqual(requestedPackages, ['foo@latest', 'bar@^4.5.0']);
+    t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
+  }
+);
 
 test.serial('local directory is checked correctly', t => {
   const packageJson = JSON.stringify({
@@ -81,23 +84,24 @@ test.serial('local directory is checked correctly', t => {
     },
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'another-file': 'hello, world',
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'another-file': 'hello, world',
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
-        t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+      t.deepEqual(nonGreenPackages, ['bar@4.5.6']);
+    }
+  );
 });
 
 test.serial('local directory should have correct licenses too', t => {
@@ -110,23 +114,24 @@ test.serial('local directory should have correct licenses too', t => {
     },
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'another-file': 'hello, world',
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'another-file': 'hello, world',
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
-        t.deepEqual(nonGreenPackages, ['hello@1.0.0', 'bar@4.5.6']);
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+      t.deepEqual(nonGreenPackages, ['hello@1.0.0', 'bar@4.5.6']);
+    }
+  );
 });
 
 test.serial('local monorepo directory is checked correctly', t => {
@@ -147,39 +152,42 @@ test.serial('local monorepo directory is checked correctly', t => {
     },
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': topLevelPackageJson,
-          'another-file': 'hello, world',
-          'packages': {
-            'sub-package': {
-              'package.json': subPackageJson,
-            },
+    {
+      'path/to/dir': {
+        'package.json': topLevelPackageJson,
+        'another-file': 'hello, world',
+        packages: {
+          'sub-package': {
+            'package.json': subPackageJson,
           },
         },
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const packageJsonPaths: string[] = [];
-        const checker = new LicenseChecker();
-        checker
-            .on('non-green-license',
-                (arg) => {
-                  nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-                })
-            .on('package.json', (filePath) => {
-              packageJsonPaths.push(filePath);
-            });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(
-            requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0', 'baz@^7.0.0']);
-        t.deepEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
-        t.deepEqual(packageJsonPaths, [
-          'path/to/dir/package.json',
-          'path/to/dir/packages/sub-package/package.json',
-        ]);
-      });
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const packageJsonPaths: string[] = [];
+      const checker = new LicenseChecker();
+      checker
+        .on('non-green-license', arg => {
+          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+        })
+        .on('package.json', filePath => {
+          packageJsonPaths.push(filePath);
+        });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, [
+        'foo@^1.2.3',
+        'bar@^4.5.0',
+        'baz@^7.0.0',
+      ]);
+      t.deepEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
+      t.deepEqual(packageJsonPaths, [
+        'path/to/dir/package.json',
+        'path/to/dir/packages/sub-package/package.json',
+      ]);
+    }
+  );
 });
 
 test.serial('package whitelist should be respected (local repo)', t => {
@@ -192,29 +200,27 @@ test.serial('package whitelist should be respected (local repo)', t => {
     },
   });
   const configJson = JSON.stringify({
-    packageWhitelist: [
-      'bar',
-    ],
+    packageWhitelist: ['bar'],
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'js-green-licenses.json': configJson,
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'js-green-licenses.json': configJson,
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.is(nonGreenPackages.length, 0);
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.is(nonGreenPackages.length, 0);
+    }
+  );
 });
-
 
 test.serial('custom green license list (local repo)', t => {
   const packageJson = JSON.stringify({
@@ -226,29 +232,27 @@ test.serial('custom green license list (local repo)', t => {
     },
   });
   const configJson = JSON.stringify({
-    greenLicenses: [
-      'Foo License',
-      'EVIL',
-    ],
+    greenLicenses: ['Foo License', 'EVIL'],
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'js-green-licenses.json': configJson,
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'js-green-licenses.json': configJson,
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
-        t.deepEqual(nonGreenPackages, ['foo@1.2.3']);  // ISC is not green now.
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, ['foo@^1.2.3', 'bar@^4.5.0']);
+      t.deepEqual(nonGreenPackages, ['foo@1.2.3']); // ISC is not green now.
+    }
+  );
 });
 
 test.serial('errors properly output to console', async t => {
@@ -256,7 +260,7 @@ test.serial('errors properly output to console', async t => {
   // written there.
   const realConsoleLog = console.log;
   let consoleOutput = '';
-  console.log = (output) => {
+  console.log = output => {
     if (output !== undefined) {
       consoleOutput += output;
     }
@@ -265,7 +269,7 @@ test.serial('errors properly output to console', async t => {
   requestedPackages = [];
   const nonGreenPackages: string[] = [];
   const checker = new LicenseChecker();
-  checker.setDefaultHandlers({setExitCode: false});
+  checker.setDefaultHandlers({ setExitCode: false });
   await checker.checkRemotePackage('foo');
   console.log = realConsoleLog;
   t.regex(consoleOutput, /EVIL: bar@4\.5\.6/);
@@ -275,63 +279,57 @@ test.serial('errors properly output to console', async t => {
 test.serial('accept private package (local repo)', t => {
   const packageJson = JSON.stringify({
     private: true,
-    dependencies: {
-
-    },
+    dependencies: {},
   });
   const configJson = JSON.stringify({
-    greenLicenses: [
-      'private',
-    ],
+    greenLicenses: ['private'],
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'js-green-licenses.json': configJson,
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'js-green-licenses.json': configJson,
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(requestedPackages, []);
-        t.deepEqual(nonGreenPackages, []);
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, []);
+      t.deepEqual(nonGreenPackages, []);
+    }
+  );
 });
 
 test.serial('decline private package (local repo)', t => {
   const packageJson = JSON.stringify({
     private: true,
-    dependencies: {
-
-    },
+    dependencies: {},
   });
   const configJson = JSON.stringify({
-    greenLicenses: [
-      'ISC',
-    ],
+    greenLicenses: ['ISC'],
   });
   return withFixtures(
-      {
-        'path/to/dir': {
-          'package.json': packageJson,
-          'js-green-licenses.json': configJson,
-        },
+    {
+      'path/to/dir': {
+        'package.json': packageJson,
+        'js-green-licenses.json': configJson,
       },
-      async () => {
-        requestedPackages = [];
-        const nonGreenPackages: string[] = [];
-        const checker = new LicenseChecker();
-        checker.on('non-green-license', arg => {
-          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
-        });
-        await checker.checkLocalDirectory('path/to/dir');
-        t.deepEqual(requestedPackages, []);
-        t.deepEqual(nonGreenPackages, ['undefined@undefined']);
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const checker = new LicenseChecker();
+      checker.on('non-green-license', arg => {
+        nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
       });
+      await checker.checkLocalDirectory('path/to/dir');
+      t.deepEqual(requestedPackages, []);
+      t.deepEqual(nonGreenPackages, ['undefined@undefined']);
+    }
+  );
 });
