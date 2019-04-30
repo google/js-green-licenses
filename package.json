@@ -54,7 +54,7 @@
     "package-json": "^6.0.0",
     "spdx-correct": "^3.0.0",
     "spdx-satisfies": "^5.0.0",
-    "strip-json-comments": "^2.0.1"
+    "strip-json-comments": "^3.0.0"
   },
   "devDependencies": {
     "@types/argparse": "^1.0.33",
