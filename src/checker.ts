@@ -116,6 +116,8 @@ export class LicenseChecker extends EventEmitter {
   private readonly processedPackages: Set<string> = new Set();
   // Cache for packageName@version's that failed for fetching.
   private readonly failedPackages: Set<string> = new Set();
+  // Local packages, for monorepo
+  private readonly localPackages: Set<string> = new Set<string>();
   private readonly opts: LicenseCheckerOptions;
   private config: config.Config = {};
   // Licenses in this expression must be valid license IDs defined in
@@ -234,6 +236,11 @@ export class LicenseChecker extends EventEmitter {
   ): Promise<void> {
     const spec = `${packageName}@${versionSpec}`;
     if (this.failedPackages.has(spec)) return;
+
+    // remove tilde/caret to check for an exact version, ^0.5.0-rc.0 becomes 0.5.0-rc.0
+    const version = versionSpec.replace(/^[^~]/, '');
+    // if the dependency is a local package then skip verification at this step. will be checked independently
+    if (this.localPackages.has(`${packageName}@${version}`)) return;
 
     try {
       const json = await packageJson(packageName, {
@@ -365,6 +372,13 @@ export class LicenseChecker extends EventEmitter {
     const packageJsons = await this.getLocalPackageJsonFiles(directory);
     if (packageJsons.length === 0) {
       console.log('No package.json files have been found.');
+    }
+    for (const pj of packageJsons) {
+      const content = await fsReadFile(pj, 'utf8');
+      const json = JSON.parse(content);
+      if (json && json.name && json.version) {
+        this.localPackages.add(`${json.name}@${json.version}`);
+      }
     }
     for (const pj of packageJsons) {
       this.emit('package.json', pj);
