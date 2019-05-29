@@ -190,6 +190,59 @@ test.serial('local monorepo directory is checked correctly', t => {
   );
 });
 
+test.serial('local monorepo with local dependency is checked correctly', t => {
+  const topLevelPackageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      'hello-sub': '^1.0.0',
+    },
+  });
+  const subPackageJson = JSON.stringify({
+    name: 'hello-sub',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      baz: '^7.0.0',
+    },
+  });
+  return withFixtures(
+    {
+      'path/to/dir': {
+        'package.json': topLevelPackageJson,
+        'another-file': 'hello, world',
+        packages: {
+          'sub-package': {
+            'package.json': subPackageJson,
+          },
+        },
+      },
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const packageJsonPaths: string[] = [];
+      const checker = new LicenseChecker();
+      checker
+        .on('non-green-license', arg => {
+          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+        })
+        .on('package.json', filePath => {
+          packageJsonPaths.push(filePath);
+        });
+      await checker.checkLocalDirectory('path/to/dir');
+      console.log(JSON.stringify(requestedPackages, null, 2));
+      t.deepEqual(requestedPackages, ['baz@^7.0.0']);
+      t.deepEqual(nonGreenPackages, ['baz@7.8.9']);
+      t.deepEqual(packageJsonPaths, [
+        'path/to/dir/package.json',
+        'path/to/dir/packages/sub-package/package.json',
+      ]);
+    }
+  );
+});
+
 test.serial('package whitelist should be respected (local repo)', t => {
   const packageJson = JSON.stringify({
     name: 'hello',
