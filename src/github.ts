@@ -15,8 +15,7 @@
 // Abstractions over GitHub REST API v3 and related features. For GitHub API,
 // see https://developer.github.com/v3/.
 
-import axios from 'axios';
-import { AxiosRequestConfig } from 'axios';
+import { request } from 'gaxios';
 import { posix as posixPath } from 'path';
 import { format as urlFormat, parse as urlParse } from 'url';
 
@@ -68,7 +67,7 @@ export class GitHubRepository {
     this.pathPrefix = posixPath.join('/repos', owner, repo);
   }
 
-  private getAxiosConfig(authToken?: string): AxiosRequestConfig {
+  private getAxiosConfig(authToken?: string) {
     return authToken
       ? { headers: { Authorization: `token ${authToken}` } }
       : {};
@@ -83,14 +82,23 @@ export class GitHubRepository {
     if (params) {
       url.query = params;
     }
-    const resp = await axios.get(urlFormat(url), this.getAxiosConfig());
+    const resp = await request({
+      method: 'GET',
+      url: urlFormat(url),
+      ...this.getAxiosConfig(),
+    });
     return resp.data;
   }
 
   private async apiPost(path: string, body?: {}): Promise<ResponseData> {
     const url = urlParse('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
-    const resp = await axios.post(urlFormat(url), body, this.getAxiosConfig());
+    const resp = await request({
+      method: 'POST',
+      url: urlFormat(url),
+      data: body,
+      ...this.getAxiosConfig(),
+    });
     return resp.data;
   }
 

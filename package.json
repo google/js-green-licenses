@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "argparse": "^1.0.10",
-    "axios": "^0.18.0",
+    "gaxios": "^2.0.1",
     "npm-package-arg": "^6.1.0",
     "package-json": "^6.0.0",
     "spdx-correct": "^3.0.0",
