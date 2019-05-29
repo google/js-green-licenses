@@ -63,11 +63,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Set NPM authentication.
-          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-      - run:
           name: Install modules and dependencies.
-          command: npm install
+          command: npm ci
+      - run:
+          name: Build
+          command: npm run compile
+      - run:
+          name: Set NPM authentication.
+          command: echo "//wombat-dressing-room.appspot.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
       - run:
           name: Publish the module to npm.
-          command: npm publish
+          command: npm publish --registry https://wombat-dressing-room.appspot.com/
