@@ -1,6 +1,6 @@
 {
   "name": "js-green-licenses",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "JavaScript package.json license checker",
   "main": "build/src/checker.js",
   "bin": {
