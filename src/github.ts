@@ -82,7 +82,7 @@ export class GitHubRepository {
     if (params) {
       url.query = params;
     }
-    const resp = await request({
+    const resp = await request<ResponseData>({
       method: 'GET',
       url: urlFormat(url),
       ...this.getAxiosConfig(),
@@ -93,7 +93,7 @@ export class GitHubRepository {
   private async apiPost(path: string, body?: {}): Promise<ResponseData> {
     const url = urlParse('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
-    const resp = await request({
+    const resp = await request<ResponseData>({
       method: 'POST',
       url: urlFormat(url),
       data: body,
