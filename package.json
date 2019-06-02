@@ -67,7 +67,7 @@
     "@types/spdx-satisfies": "^0.1.0",
     "@types/strip-json-comments": "0.0.30",
     "@types/tmp": "0.1.0",
-    "ava": "^1.0.0",
+    "ava": "^2.0.0",
     "codecov": "^3.0.1",
     "gts": "^1.0.0",
     "make-dir": "^3.0.0",
