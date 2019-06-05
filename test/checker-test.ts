@@ -14,10 +14,10 @@
 
 import test from 'ava';
 import proxyquire from 'proxyquire';
+import { withFixtures } from 'inline-fixtures';
 
 import * as checker from '../src/checker';
 import { PackageJson } from '../src/package-json-file';
-import { withFixtures } from './fixtures';
 
 const { LicenseChecker } = proxyquire<typeof checker>('../src/checker', {
   // fake packge-json
