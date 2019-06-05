@@ -236,7 +236,7 @@ export class LicenseChecker extends EventEmitter {
     // indicated directory
     if (versionSpec.startsWith('file:') && localDirectory) {
       const relativePath = versionSpec.slice('file:'.length);
-      const packageJsonPath = path.join(
+      const packageJsonPath = path.resolve(
         localDirectory,
         relativePath,
         'package.json'
