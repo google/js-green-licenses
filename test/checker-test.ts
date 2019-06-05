@@ -333,3 +333,60 @@ test.serial('decline private package (local repo)', t => {
     }
   );
 });
+
+test.serial('support local paths', t => {
+  const primaryPackageJson = JSON.stringify({
+    name: 'hello',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      foo: '^1.2.3',
+      linked: 'file:../linked',
+    },
+  });
+  const linkedPackageJson = JSON.stringify({
+    name: 'linked',
+    version: '1.0.0',
+    license: 'Apache-2.0',
+    dependencies: {
+      baz: '^7.0.0',
+    },
+  });
+  return withFixtures(
+    {
+      'path/to/primary': {
+        'package.json': primaryPackageJson,
+        'another-file': 'meh, world.',
+      },
+      'path/to/linked': {
+        'package.json': linkedPackageJson,
+        'another-file': 'i depend on a package with an evil license',
+      },
+    },
+    async () => {
+      requestedPackages = [];
+      const nonGreenPackages: string[] = [];
+      const packageJsonPaths: string[] = [];
+      const checker = new LicenseChecker();
+      checker
+        .on('non-green-license', arg => {
+          nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+        })
+        .on('package.json', filePath => {
+          packageJsonPaths.push(filePath);
+        });
+      await checker.checkLocalDirectory('path/to/primary');
+      console.log('requested packages: ', requestedPackages);
+      t.deepEqual(requestedPackages, [
+        'foo@^1.2.3',
+        'bar@^4.5.0',
+        'baz@^7.0.0',
+      ]);
+      t.deepEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
+      t.deepEqual(packageJsonPaths, [
+        'path/to/primary/package.json',
+        'path/to/linked/package.json',
+      ]);
+    }
+  );
+});

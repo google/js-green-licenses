@@ -227,20 +227,51 @@ export class LicenseChecker extends EventEmitter {
     }
   }
 
+  private async getPackageJson(
+    packageName: string,
+    versionSpec: string,
+    localDirectory: string | null
+  ): Promise<{}> {
+    // If this has a relative URL, and is a local package, find the package json from the
+    // indicated directory
+    if (versionSpec.startsWith('file:') && localDirectory) {
+      const relativePath = versionSpec.slice('file:'.length);
+      const packageJsonPath = path.join(
+        localDirectory,
+        relativePath,
+        'package.json'
+      );
+      this.emit('package.json', packageJsonPath);
+      const contents = await fsReadFile(packageJsonPath, 'utf8');
+      return JSON.parse(contents);
+    }
+    return packageJson(packageName, {
+      version: versionSpec,
+      fullMetadata: true,
+    });
+  }
+
   private async checkLicenses(
     packageName: string,
     versionSpec: string,
+    localDirectory: string | null,
     ...parents: string[]
   ): Promise<void> {
     const spec = `${packageName}@${versionSpec}`;
     if (this.failedPackages.has(spec)) return;
 
     try {
-      const json = await packageJson(packageName, {
-        version: versionSpec,
-        fullMetadata: true,
-      });
-      await this.checkPackageJson(json, packageName, ...parents);
+      const json = await this.getPackageJson(
+        packageName,
+        versionSpec,
+        localDirectory
+      );
+      await this.checkPackageJson(
+        json,
+        packageName,
+        localDirectory,
+        ...parents
+      );
     } catch (err) {
       this.failedPackages.add(spec);
       this.emit('error', {
@@ -254,18 +285,20 @@ export class LicenseChecker extends EventEmitter {
 
   private async checkLicensesForDeps(
     deps: Dependencies | undefined,
+    localDirectory: string | null,
     ...parents: string[]
   ): Promise<void> {
     if (!deps) return;
     for (const pkg of Object.keys(deps)) {
       const depVersion = deps[pkg];
-      await this.checkLicenses(pkg, depVersion, ...parents);
+      await this.checkLicenses(pkg, depVersion, localDirectory, ...parents);
     }
   }
 
   private async checkPackageJson(
     json: {},
     packageName: string | null,
+    localDirectory: string | null,
     ...parents: string[]
   ): Promise<void> {
     const pj: PackageJson = ensurePackageJson(json);
@@ -298,24 +331,29 @@ export class LicenseChecker extends EventEmitter {
 
     await this.checkLicensesForDeps(
       pj.dependencies,
+      localDirectory,
       ...parents,
       packageAndVersion
     );
     if (this.opts.dev) {
       await this.checkLicensesForDeps(
         pj.devDependencies,
+        localDirectory,
         ...parents,
         packageAndVersion
       );
     }
   }
 
-  private async checkPackageJsonContent(content: string): Promise<void> {
+  private async checkPackageJsonContent(
+    content: string,
+    localDirectory: string | null
+  ): Promise<void> {
     // tslint:disable-next-line:no-any `JSON.parse()` returns any
     let json: any = null;
     try {
       json = JSON.parse(content);
-      await this.checkPackageJson(json, json.name);
+      await this.checkPackageJson(json, json.name, localDirectory);
     } catch (err) {
       const packageName = (json && json.name) || '(unknown package)';
       const versionSpec = (json && json.version) || '(unknown version)';
@@ -369,7 +407,7 @@ export class LicenseChecker extends EventEmitter {
     for (const pj of packageJsons) {
       this.emit('package.json', pj);
       const content = await fsReadFile(pj, 'utf8');
-      await this.checkPackageJsonContent(content);
+      await this.checkPackageJsonContent(content, path.dirname(pj));
     }
     this.emit('end');
   }
@@ -385,7 +423,7 @@ export class LicenseChecker extends EventEmitter {
     if (!pkgArgs.name || !pkgArgs.fetchSpec) {
       throw new Error(`Invalid package spec: ${pkg}`);
     }
-    await this.checkLicenses(pkgArgs.name, pkgArgs.fetchSpec);
+    await this.checkLicenses(pkgArgs.name, pkgArgs.fetchSpec, null);
     this.emit('end');
   }
 
@@ -416,7 +454,7 @@ export class LicenseChecker extends EventEmitter {
     }
     for (const pj of packageJsons) {
       this.emit('package.json', pj.filePath);
-      await this.checkPackageJsonContent(pj.content);
+      await this.checkPackageJsonContent(pj.content, null);
     }
     this.emit('end');
   }
