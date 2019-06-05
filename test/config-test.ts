@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import test from 'ava';
+import { withFixtures } from 'inline-fixtures';
 
 import * as config from '../src/config';
 import { GitHubRepository } from '../src/github';
-import { withFixtures } from './fixtures';
 
 test.serial('read correct contents from local config file', t => {
   const configContent = JSON.stringify({
