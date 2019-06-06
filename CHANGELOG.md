@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+## [1.1.0](https://www.github.com/google/js-green-licenses/compare/v1.0.0...v1.1.0) (2019-06-05)
+
+
+### Features
+
+* support local paths ([#101](https://www.github.com/google/js-green-licenses/issues/101)) ([6d08407](https://www.github.com/google/js-green-licenses/commit/6d08407))
+
 ## [1.0.0](https://www.github.com/google/js-green-licenses/compare/v0.5.0...v1.0.0) (2019-05-29)
 
 
