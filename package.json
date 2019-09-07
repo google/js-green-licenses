@@ -77,6 +77,6 @@
     "nyc": "^14.0.0",
     "proxyquire": "^2.0.1",
     "tmp": "0.1.0",
-    "typescript": "~3.5.0"
+    "typescript": "~3.6.0"
   }
 }
