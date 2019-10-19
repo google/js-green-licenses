@@ -62,6 +62,7 @@
     "@types/spdx-satisfies": "^0.1.0",
     "@types/strip-json-comments": "0.0.30",
     "@types/tmp": "0.1.0",
+    "assert-rejects": "^1.0.0",
     "c8": "^5.0.4",
     "codecov": "^3.0.1",
     "gts": "^1.0.0",

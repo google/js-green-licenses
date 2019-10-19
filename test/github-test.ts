@@ -14,6 +14,7 @@
 
 import * as assert from 'assert';
 import nock from 'nock';
+import assertRejects = require('assert-rejects');
 import { GitHubRepository } from '../src/github';
 
 describe(__filename, () => {
@@ -65,7 +66,7 @@ describe(__filename, () => {
         mergeable: null,
       });
     // Currently gives up after 10 retries (i.e. 11 tries total).
-    await assert.rejects(
+    await assertRejects(
       repo.getPRCommits(12345, 11),
       /Tried 11 times but the mergeable field is not set. Giving up/
     );
@@ -80,7 +81,7 @@ describe(__filename, () => {
         merge_commit_sha: 'deadbeef',
         head: { sha: 'foobar' },
       });
-    await assert.rejects(repo.getPRCommits(12345), /PR is not mergeable/);
+    await assertRejects(repo.getPRCommits(12345), /PR is not mergeable/);
     scope.done();
   });
 
@@ -91,7 +92,7 @@ describe(__filename, () => {
         mergeable: true,
         head: { sha: 'foobar' },
       });
-    await assert.rejects(
+    await assertRejects(
       repo.getPRCommits(12345),
       /Merge commit SHA is not found/
     );
@@ -105,7 +106,7 @@ describe(__filename, () => {
         mergeable: true,
         merge_commit_sha: 'deadbeef',
       });
-    await assert.rejects(
+    await assertRejects(
       repo.getPRCommits(12345),
       /HEAD commit SHA is not found/
     );
@@ -149,7 +150,7 @@ describe(__filename, () => {
     const scope = nock('https://api.github.com')
       .get('/repos/luke/star-destroyer/contents/package.json' + '?ref=deadbeef')
       .reply(200);
-    await assert.rejects(
+    await assertRejects(
       repo.getPackageJsonFiles('deadbeef'),
       /Content of package.json not found/
     );
