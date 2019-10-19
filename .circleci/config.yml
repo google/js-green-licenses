@@ -7,16 +7,8 @@ release_tags: &release_tags
 unit_tests: &unit_tests
   steps:
     - checkout
-    - run:
-        name: Install modules and dependencies.
-        command: npm install
-    - run:
-        name: Run unit tests.
-        command: npm test
-    - run:
-        name: Submit coverage data to codecov.
-        command: npm run codecov
-        when: always
+    - run: npm install
+    - run: npm test
 
 version: 2.0
 workflows:
@@ -34,6 +26,8 @@ workflows:
             - node8
             - node10
             - node12
+            - codecov
+            - lint
           filters:
             branches:
               ignore: /.*/
@@ -55,6 +49,23 @@ jobs:
       - image: node:12
         user: node
     <<: *unit_tests
+  codecov:
+    docker:
+      - image: node:12
+        user: node
+    steps:
+      - checkout
+      - npm install
+      - npm test
+      - npm run codecov
+  lint:
+    docker:
+      - image: node:12
+        user: node
+    steps:
+      - checkout
+      - npm install
+      - npm run check
 
   publish_npm:
     docker:
@@ -62,15 +73,7 @@ jobs:
         user: node
     steps:
       - checkout
-      - run:
-          name: Install modules and dependencies.
-          command: npm ci
-      - run:
-          name: Build
-          command: npm run compile
-      - run:
-          name: Set NPM authentication.
-          command: echo "//wombat-dressing-room.appspot.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-      - run:
-          name: Publish the module to npm.
-          command: npm publish --registry https://wombat-dressing-room.appspot.com/
+      - run: npm ci
+      - run: npm run compile
+      - run: echo "//wombat-dressing-room.appspot.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - run: npm publish --registry https://wombat-dressing-room.appspot.com/
