@@ -21,6 +21,10 @@ workflows:
           filters: *release_tags
       - node12:
           filters: *release_tags
+      - lint:
+          filters: *release_tags
+      - codecov:
+          filters: *release_tags
       - publish_npm:
           requires:
             - node8
