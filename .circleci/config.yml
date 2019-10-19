@@ -59,17 +59,17 @@ jobs:
         user: node
     steps:
       - checkout
-      - npm install
-      - npm test
-      - npm run codecov
+      - run: npm install
+      - run: npm test
+      - run: npm run codecov
   lint:
     docker:
       - image: node:12
         user: node
     steps:
       - checkout
-      - npm install
-      - npm run check
+      - run: npm install
+      - run: npm run check
 
   publish_npm:
     docker:
