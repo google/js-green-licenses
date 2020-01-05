@@ -68,7 +68,7 @@
     "gts": "^1.0.0",
     "inline-fixtures": "^1.1.0",
     "make-dir": "^3.0.0",
-    "mocha": "^6.2.2",
+    "mocha": "^7.0.0",
     "mock-fs": "^4.4.2",
     "nock": "^11.0.0",
     "proxyquire": "^2.0.1",
