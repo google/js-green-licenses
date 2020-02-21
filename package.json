@@ -73,6 +73,6 @@
     "nock": "^12.0.0",
     "proxyquire": "^2.0.1",
     "tmp": "0.1.0",
-    "typescript": "~3.7.0"
+    "typescript": "~3.8.0"
   }
 }
