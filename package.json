@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "argparse": "^1.0.10",
-    "gaxios": "^2.0.1",
+    "gaxios": "^3.0.0",
     "npm-package-arg": "^8.0.0",
     "package-json": "^6.0.0",
     "spdx-correct": "^3.0.0",
