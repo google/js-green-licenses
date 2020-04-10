@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import * as assert from 'assert';
-import { withFixtures } from 'inline-fixtures';
+import {describe, it} from 'mocha';
+import {withFixtures} from 'inline-fixtures';
 import * as config from '../src/config';
-import { GitHubRepository } from '../src/github';
+import {GitHubRepository} from '../src/github';
 
 describe(__filename, () => {
   it('read correct contents from local config file', async () => {
@@ -25,7 +26,7 @@ describe(__filename, () => {
     });
 
     return withFixtures(
-      { 'repo/directory': { 'js-green-licenses.json': configContent } },
+      {'repo/directory': {'js-green-licenses.json': configContent}},
       async () => {
         const cfg = await config.getLocalConfig('repo/directory');
         assert.ok(cfg);
@@ -44,10 +45,7 @@ describe(__filename, () => {
         super('janedoe', 'repo');
       }
 
-      async getFileContent(
-        commitSha: string,
-        path: string
-      ): Promise<string | null> {
+      async getFileContent(): Promise<string | null> {
         return JSON.stringify({
           greenLicenses: ['BAR', 'BAZ'],
           packageWhitelist: ['package-1', 'package-2'],
@@ -64,7 +62,7 @@ describe(__filename, () => {
   });
 
   it('no config file is ok (local)', async () => {
-    return withFixtures({ 'repo/directory': {} }, async () => {
+    return withFixtures({'repo/directory': {}}, async () => {
       const cfg = await config.getLocalConfig('repo/directory');
       assert.strictEqual(cfg, null);
     });
@@ -76,10 +74,7 @@ describe(__filename, () => {
         super('janedoe', 'repo');
       }
 
-      async getFileContent(
-        commitSha: string,
-        path: string
-      ): Promise<string | null> {
+      async getFileContent(): Promise<string | null> {
         return null;
       }
     }
@@ -125,10 +120,7 @@ describe(__filename, () => {
         super('janedoe', 'repo');
       }
 
-      async getFileContent(
-        commitSha: string,
-        path: string
-      ): Promise<string | null> {
+      async getFileContent(): Promise<string | null> {
         return JSON.stringify({
           // must be an array.
           greenLicenses: {

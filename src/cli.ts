@@ -14,10 +14,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ArgumentParser } from 'argparse';
-import { LicenseChecker } from './checker';
+import {ArgumentParser} from 'argparse';
+import {LicenseChecker} from './checker';
 
-const { version } = require('../../package.json');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const {version} = require('../../package.json');
 
 const argParser = new ArgumentParser({
   version,
@@ -59,12 +60,12 @@ async function main(): Promise<void> {
     dev: !!args.dev,
     verbose: !!args.verbose,
   });
-  checker.setDefaultHandlers({ setExitCode: true });
+  checker.setDefaultHandlers({setExitCode: true});
   if (args.local) {
     await checker.checkLocalDirectory(args.local[0]);
   } else if (args.pr) {
-    const { repo, prId } = checker.prPathToGitHubRepoAndId(args.pr[0]);
-    const { mergeCommitSha } = await repo.getPRCommits(prId);
+    const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
+    const {mergeCommitSha} = await repo.getPRCommits(prId);
     await checker.checkGitHubPR(repo, mergeCommitSha);
   } else if (args.package) {
     await checker.checkRemotePackage(args.package);

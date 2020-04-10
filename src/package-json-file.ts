@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { inspect } from 'util';
+import {inspect} from 'util';
 
 export interface OldLicenseField {
   type: string;
@@ -48,9 +48,9 @@ function isLicense(obj: {}): obj is License {
   );
 }
 
-// tslint:disable-next-line:no-any `obj` is from JSON and can be any.
-function isDependencies(obj: any): obj is Dependencies {
+function isDependencies(obj: {[index: string]: {}}): obj is Dependencies {
   for (const key in obj) {
+    // eslint-disable-next-line no-prototype-builtins
     if (obj.hasOwnProperty(key) && typeof obj[key] !== 'string') {
       return false;
     }

@@ -14,8 +14,8 @@
 
 import * as assert from 'assert';
 import nock from 'nock';
-import assertRejects = require('assert-rejects');
-import { GitHubRepository } from '../src/github';
+import {describe, it, beforeEach, afterEach} from 'mocha';
+import {GitHubRepository} from '../src/github';
 
 describe(__filename, () => {
   let repo: GitHubRepository;
@@ -31,9 +31,9 @@ describe(__filename, () => {
       .reply(200, {
         mergeable: true,
         merge_commit_sha: 'deadbeef',
-        head: { sha: 'foobar' },
+        head: {sha: 'foobar'},
       });
-    const { mergeCommitSha, headCommitSha } = await repo.getPRCommits(12345);
+    const {mergeCommitSha, headCommitSha} = await repo.getPRCommits(12345);
     scope.done();
     assert.strictEqual(mergeCommitSha, 'deadbeef');
     assert.strictEqual(headCommitSha, 'foobar');
@@ -50,9 +50,9 @@ describe(__filename, () => {
       .reply(200, {
         mergeable: true,
         merge_commit_sha: 'deadbeef',
-        head: { sha: 'foobar' },
+        head: {sha: 'foobar'},
       });
-    const { mergeCommitSha, headCommitSha } = await repo.getPRCommits(12345);
+    const {mergeCommitSha, headCommitSha} = await repo.getPRCommits(12345);
     firstScope.done();
     retryScope.done();
     assert.strictEqual(mergeCommitSha, 'deadbeef');
@@ -66,7 +66,7 @@ describe(__filename, () => {
         mergeable: null,
       });
     // Currently gives up after 10 retries (i.e. 11 tries total).
-    await assertRejects(
+    await assert.rejects(
       repo.getPRCommits(12345, 11),
       /Tried 11 times but the mergeable field is not set. Giving up/
     );
@@ -79,9 +79,9 @@ describe(__filename, () => {
       .reply(200, {
         mergeable: false,
         merge_commit_sha: 'deadbeef',
-        head: { sha: 'foobar' },
+        head: {sha: 'foobar'},
       });
-    await assertRejects(repo.getPRCommits(12345), /PR is not mergeable/);
+    await assert.rejects(repo.getPRCommits(12345), /PR is not mergeable/);
     scope.done();
   });
 
@@ -90,9 +90,9 @@ describe(__filename, () => {
       .get('/repos/luke/star-destroyer/pulls/12345')
       .reply(200, {
         mergeable: true,
-        head: { sha: 'foobar' },
+        head: {sha: 'foobar'},
       });
-    await assertRejects(
+    await assert.rejects(
       repo.getPRCommits(12345),
       /Merge commit SHA is not found/
     );
@@ -106,7 +106,7 @@ describe(__filename, () => {
         mergeable: true,
         merge_commit_sha: 'deadbeef',
       });
-    await assertRejects(
+    await assert.rejects(
       repo.getPRCommits(12345),
       /HEAD commit SHA is not found/
     );
@@ -150,7 +150,7 @@ describe(__filename, () => {
     const scope = nock('https://api.github.com')
       .get('/repos/luke/star-destroyer/contents/package.json' + '?ref=deadbeef')
       .reply(200);
-    await assertRejects(
+    await assert.rejects(
       repo.getPackageJsonFiles('deadbeef'),
       /Content of package.json not found/
     );
