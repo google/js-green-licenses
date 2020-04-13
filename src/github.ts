@@ -15,9 +15,10 @@
 // Abstractions over GitHub REST API v3 and related features. For GitHub API,
 // see https://developer.github.com/v3/.
 
-import { request } from 'gaxios';
-import { posix as posixPath } from 'path';
-import { format as urlFormat, parse as urlParse } from 'url';
+import {request} from 'gaxios';
+import {posix as posixPath} from 'path';
+// eslint-disable-next-line node/no-deprecated-api
+import {format as urlFormat, parse as urlParse} from 'url';
 
 interface SingleResponseData {
   content?: string;
@@ -25,7 +26,7 @@ interface SingleResponseData {
   merge_commit_sha?: string;
   name?: string;
   type?: string;
-  head?: { sha?: string };
+  head?: {sha?: string};
 }
 type ResponseData = SingleResponseData | SingleResponseData[];
 
@@ -68,9 +69,7 @@ export class GitHubRepository {
   }
 
   private getAxiosConfig(authToken?: string) {
-    return authToken
-      ? { headers: { Authorization: `token ${authToken}` } }
-      : {};
+    return authToken ? {headers: {Authorization: `token ${authToken}`}} : {};
   }
 
   private async apiGet(
@@ -105,7 +104,7 @@ export class GitHubRepository {
   async getPRCommits(prId: number, attemptCount = 1): Promise<PRCommits> {
     let answer = await this.apiGet(posixPath.join('pulls', prId.toString()));
     answer = ensureSingleResponseData(answer);
-    if (answer.mergeable == null) {
+    if (answer.mergeable === null) {
       if (attemptCount > GitHubRepository.MAX_PR_COMMIT_RETRIES) {
         throw new Error(
           `Tried ${attemptCount} times but the mergeable field is not set. Giving up`
@@ -128,7 +127,7 @@ export class GitHubRepository {
     if (!headCommitSha) {
       throw new Error('HEAD commit SHA is not found');
     }
-    return { mergeCommitSha, headCommitSha };
+    return {mergeCommitSha, headCommitSha};
   }
 
   async createPRReview(
@@ -188,7 +187,7 @@ export class GitHubRepository {
       return null;
     }
     const filePath = posixPath.join('/', dir, 'package.json');
-    return { filePath, content };
+    return {filePath, content};
   }
 
   async getPackageJsonFiles(commitSha: string): Promise<PackageJsonFile[]> {
@@ -203,7 +202,7 @@ export class GitHubRepository {
     // Find `packages/<name>/package.json` files in case this is a monorepo.
     let answer: ResponseData;
     try {
-      answer = await this.apiGet('contents/packages', { ref: commitSha });
+      answer = await this.apiGet('contents/packages', {ref: commitSha});
     } catch {
       // Not a monorepo. Return just the top-level package.json.
       return packageJsons;

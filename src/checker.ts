@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EventEmitter } from 'events';
+import {EventEmitter} from 'events';
 import * as fs from 'fs';
 import npmPackageArg from 'npm-package-arg';
 import packageJson from 'package-json';
 import * as path from 'path';
 import spdxCorrect from 'spdx-correct';
 import spdxSatisfies from 'spdx-satisfies';
-import { inspect, promisify } from 'util';
+import {inspect, promisify} from 'util';
 
 import * as config from './config';
-import { GitHubRepository } from './github';
+import {GitHubRepository} from './github';
 import {
   Dependencies,
   ensurePackageJson,
   PackageJson,
 } from './package-json-file';
 
-export { GitHubRepository } from './github';
+export {GitHubRepository} from './github';
 
 const fsAccess = promisify(fs.access);
 const fsReadDir = promisify(fs.readdir);
@@ -126,9 +126,9 @@ export class LicenseChecker extends EventEmitter {
   // List of license names that are not SPDX-conforming IDs but are allowed.
   private whitelistedLicenses: string[] = [];
 
-  constructor({ dev = false, verbose = false }: LicenseCheckerOptions = {}) {
+  constructor({dev = false, verbose = false}: LicenseCheckerOptions = {}) {
     super();
-    this.opts = { dev, verbose };
+    this.opts = {dev, verbose};
   }
 
   on(
@@ -139,7 +139,7 @@ export class LicenseChecker extends EventEmitter {
   on(event: 'package.json', listener: (filePath: string) => void): this;
   on(event: 'end', listener: () => void): this;
   on(event: 'error', listener: (checkError: CheckError) => void): this;
-  // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: EventType, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }
@@ -148,7 +148,7 @@ export class LicenseChecker extends EventEmitter {
   emit(event: 'package.json', filePath: string): boolean;
   emit(event: 'end'): boolean;
   emit(event: 'error', checkError: CheckError): boolean;
-  // tslint:disable-next-line:no-any `EventEmitter` uses ...args: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   emit(event: EventType, ...args: any[]): boolean {
     return super.emit(event, ...args);
   }
@@ -356,7 +356,7 @@ export class LicenseChecker extends EventEmitter {
     content: string,
     localDirectory: string | null
   ): Promise<void> {
-    // tslint:disable-next-line:no-any `JSON.parse()` returns any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let json: any = null;
     try {
       json = JSON.parse(content);
@@ -444,7 +444,7 @@ export class LicenseChecker extends EventEmitter {
   /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
   prPathToGitHubRepoAndId(
     prPath: string
-  ): { repo: GitHubRepository; prId: number } {
+  ): {repo: GitHubRepository; prId: number} {
     const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
     const matched = regexp.exec(prPath);
     if (!matched) {
@@ -454,7 +454,7 @@ export class LicenseChecker extends EventEmitter {
       );
     }
     const [, owner, repoName, prId] = matched;
-    return { repo: new GitHubRepository(owner, repoName), prId: Number(prId) };
+    return {repo: new GitHubRepository(owner, repoName), prId: Number(prId)};
   }
 
   async checkGitHubPR(
@@ -479,7 +479,7 @@ export class LicenseChecker extends EventEmitter {
     let errorCount = 0;
     this.on(
       'non-green-license',
-      ({ packageName, version, licenseName, parentPackages }) => {
+      ({packageName, version, licenseName, parentPackages}) => {
         nonGreenCount++;
         const licenseDisplay = licenseName || '(no license)';
         const packageAndVersion = `${packageName}@${version}`;
@@ -492,7 +492,7 @@ export class LicenseChecker extends EventEmitter {
         console.log(`Checking ${filePath}...`);
         console.log();
       })
-      .on('error', ({ err, packageName, versionSpec, parentPackages }) => {
+      .on('error', ({err, packageName, versionSpec, parentPackages}) => {
         errorCount++;
         const packageAndVersion = `${packageName}@${versionSpec}`;
         console.log(`Error while checking ${packageAndVersion}:`);

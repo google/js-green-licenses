@@ -13,16 +13,17 @@
 // limitations under the License.
 
 import proxyquire from 'proxyquire';
-import { withFixtures } from 'inline-fixtures';
+import {describe, it} from 'mocha';
+import {withFixtures} from 'inline-fixtures';
 import * as assert from 'assert';
 import * as checker from '../src/checker';
-import { PackageJson } from '../src/package-json-file';
+import {PackageJson} from '../src/package-json-file';
 
-const { LicenseChecker } = proxyquire<typeof checker>('../src/checker', {
+const {LicenseChecker} = proxyquire<typeof checker>('../src/checker', {
   // fake packge-json
   'package-json': (
     pkg: string,
-    opts?: { version?: string }
+    opts?: {version?: string}
   ): Promise<PackageJson> => {
     if (!opts || !opts.version) {
       throw new Error('package options or version does not exist');
@@ -318,7 +319,7 @@ describe(__filename, () => {
     };
     requestedPackages = [];
     const checker = new LicenseChecker();
-    checker.setDefaultHandlers({ setExitCode: false });
+    checker.setDefaultHandlers({setExitCode: false});
     await checker.checkRemotePackage('foo');
     console.log = realConsoleLog;
     assert.ok(/EVIL: bar@4\.5\.6/.test(consoleOutput));
