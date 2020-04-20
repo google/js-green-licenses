@@ -1,7 +1,7 @@
 # JavaScript package.json License Checker
 
 [![NPM Version][npm-image]][npm-url]
-[![CircleCI][circle-image]][circle-url]
+[![CI][actions-image]][actions-url]
 [![Dependency Status][david-image]][david-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![codecov][codecov-image]][codecov-url]
@@ -308,8 +308,8 @@ A `LicenseChecker` object emits following events during its processing.
     }
     ```
 
-[circle-image]: https://circleci.com/gh/google/js-green-licenses.svg?style=shield
-[circle-url]: https://circleci.com/gh/google/js-green-licenses
+[actions-image]: https://github.com/google/js-green-licenses/workflows/ci/badge.svg
+[actions-url]: https://github.com/google/js-green-licenses/actions
 [codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/google/js-green-licenses
 [david-image]: https://david-dm.org/google/js-green-licenses.svg

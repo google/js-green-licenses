@@ -12,16 +12,14 @@
   "types": "build/src/checker",
   "scripts": {
     "test": "c8 mocha build/test",
-    "codecov": "c8 report --reporter=json && codecov -f coverage/*.json",
-    "check": "gts check",
+    "lint": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
     "fix": "gts fix",
     "start": "node build/src/cli.js",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check && npm run check-self",
-    "check-self": "node build/src/cli.js --local ."
+    "license-check": "node build/src/cli.js --local ."
   },
   "engines": {
     "node": ">= 10.x"
