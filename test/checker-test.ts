@@ -16,6 +16,7 @@ import proxyquire from 'proxyquire';
 import {describe, it} from 'mocha';
 import {withFixtures} from 'inline-fixtures';
 import * as assert from 'assert';
+import * as path from 'path';
 import * as checker from '../src/checker';
 import {PackageJson} from '../src/package-json-file';
 
@@ -149,9 +150,10 @@ describe(__filename, () => {
         baz: '^7.0.0',
       },
     });
+    const pathToDir = path.join('path', 'to', 'dir');
     return withFixtures(
       {
-        'path/to/dir': {
+        [pathToDir]: {
           'package.json': topLevelPackageJson,
           'another-file': 'hello, world',
           packages: {
@@ -173,7 +175,7 @@ describe(__filename, () => {
           .on('package.json', filePath => {
             packageJsonPaths.push(filePath);
           });
-        await checker.checkLocalDirectory('path/to/dir');
+        await checker.checkLocalDirectory(pathToDir);
         assert.deepStrictEqual(requestedPackages, [
           'foo@^1.2.3',
           'bar@^4.5.0',
@@ -181,8 +183,8 @@ describe(__filename, () => {
         ]);
         assert.deepStrictEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
         assert.deepStrictEqual(packageJsonPaths, [
-          'path/to/dir/package.json',
-          'path/to/dir/packages/sub-package/package.json',
+          path.join(pathToDir, 'package.json'),
+          path.join(pathToDir, 'packages', 'sub-package', 'package.json'),
         ]);
       }
     );
@@ -205,9 +207,10 @@ describe(__filename, () => {
         baz: '^7.0.0',
       },
     });
+    const pathToDir = path.join('path', 'to', 'dir');
     return withFixtures(
       {
-        'path/to/dir': {
+        [pathToDir]: {
           'package.json': topLevelPackageJson,
           'another-file': 'hello, world',
           packages: {
@@ -229,13 +232,13 @@ describe(__filename, () => {
           .on('package.json', filePath => {
             packageJsonPaths.push(filePath);
           });
-        await checker.checkLocalDirectory('path/to/dir');
+        await checker.checkLocalDirectory(pathToDir);
         console.log(JSON.stringify(requestedPackages, null, 2));
         assert.deepStrictEqual(requestedPackages, ['baz@^7.0.0']);
         assert.deepStrictEqual(nonGreenPackages, ['baz@7.8.9']);
         assert.deepStrictEqual(packageJsonPaths, [
-          'path/to/dir/package.json',
-          'path/to/dir/packages/sub-package/package.json',
+          path.join(pathToDir, 'package.json'),
+          path.join(pathToDir, 'packages', 'sub-package', 'package.json'),
         ]);
       }
     );
@@ -253,9 +256,10 @@ describe(__filename, () => {
     const configJson = JSON.stringify({
       packageWhitelist: ['bar'],
     });
+    const pathToDir = path.join('path', 'to', 'dir');
     return withFixtures(
       {
-        'path/to/dir': {
+        [pathToDir]: {
           'package.json': packageJson,
           'js-green-licenses.json': configJson,
         },
@@ -267,7 +271,7 @@ describe(__filename, () => {
         checker.on('non-green-license', arg => {
           nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
         });
-        await checker.checkLocalDirectory('path/to/dir');
+        await checker.checkLocalDirectory(pathToDir);
         assert.strictEqual(nonGreenPackages.length, 0);
       }
     );
@@ -402,13 +406,15 @@ describe(__filename, () => {
         baz: '^7.0.0',
       },
     });
+    const pathToPrimary = path.join('path', 'to', 'primary');
+    const pathToLinked = path.join('path', 'to', 'linked');
     return withFixtures(
       {
-        'path/to/primary': {
+        [pathToPrimary]: {
           'package.json': primaryPackageJson,
           'another-file': 'meh, world.',
         },
-        'path/to/linked': {
+        [pathToLinked]: {
           'package.json': linkedPackageJson,
           'another-file': 'i depend on a package with an evil license',
         },
@@ -425,7 +431,7 @@ describe(__filename, () => {
           .on('package.json', filePath => {
             packageJsonPaths.push(filePath);
           });
-        await checker.checkLocalDirectory('path/to/primary');
+        await checker.checkLocalDirectory(pathToPrimary);
         console.log('requested packages: ', requestedPackages);
         assert.deepStrictEqual(requestedPackages, [
           'foo@^1.2.3',
@@ -434,8 +440,8 @@ describe(__filename, () => {
         ]);
         assert.deepStrictEqual(nonGreenPackages, ['bar@4.5.6', 'baz@7.8.9']);
         assert.deepStrictEqual(packageJsonPaths, [
-          'path/to/primary/package.json',
-          'path/to/linked/package.json',
+          path.join(pathToPrimary, 'package.json'),
+          path.join(pathToLinked, 'package.json'),
         ]);
       }
     );
