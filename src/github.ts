@@ -17,8 +17,7 @@
 
 import {request} from 'gaxios';
 import {posix as posixPath} from 'path';
-// eslint-disable-next-line node/no-deprecated-api
-import {format as urlFormat, parse as urlParse} from 'url';
+import {URL} from 'url';
 
 interface SingleResponseData {
   content?: string;
@@ -76,25 +75,27 @@ export class GitHubRepository {
     path: string,
     params?: QueryParams
   ): Promise<ResponseData> {
-    const url = urlParse('https://api.github.com', true);
+    const url = new URL('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
     if (params) {
-      url.query = params;
+      Object.keys(params).forEach(key => {
+        url.searchParams.set(key, params[key]);
+      });
     }
     const resp = await request<ResponseData>({
       method: 'GET',
-      url: urlFormat(url),
+      url: url.href,
       ...this.getAxiosConfig(),
     });
     return resp.data;
   }
 
   private async apiPost(path: string, body?: {}): Promise<ResponseData> {
-    const url = urlParse('https://api.github.com');
+    const url = new URL('https://api.github.com');
     url.pathname = posixPath.join(this.pathPrefix, path);
     const resp = await request<ResponseData>({
       method: 'POST',
-      url: urlFormat(url),
+      url: url.href,
       data: body,
       ...this.getAxiosConfig(),
     });
