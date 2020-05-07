@@ -4,6 +4,25 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+## [2.0.0](https://www.github.com/google/js-green-licenses/compare/v1.1.0...v2.0.0) (2020-05-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop support for node.js 8 (#124)
+
+### Bug Fixes
+
+* **deps:** update dependency gaxios to v3 ([#121](https://www.github.com/google/js-green-licenses/issues/121)) ([1fdd3e4](https://www.github.com/google/js-green-licenses/commit/1fdd3e4e7ad642da55ad94b72d71049f4789310c))
+* **deps:** update dependency npm-package-arg to v7 ([#110](https://www.github.com/google/js-green-licenses/issues/110)) ([25d0235](https://www.github.com/google/js-green-licenses/commit/25d0235d0ff996b644fe84482241bda5a4b14b2a))
+* **deps:** update dependency npm-package-arg to v8 ([#111](https://www.github.com/google/js-green-licenses/issues/111)) ([4763858](https://www.github.com/google/js-green-licenses/commit/4763858fe10d35e2f1e944d0f4e91a309503c812))
+* add 0BSD as a valid license ([#132](https://www.github.com/google/js-green-licenses/issues/132)) ([e4db3eb](https://www.github.com/google/js-green-licenses/commit/e4db3ebe01bf49a922f0d3a0d71d9ee4af83cdf0))
+
+
+### Build System
+
+* drop support for node.js 8 ([#124](https://www.github.com/google/js-green-licenses/issues/124)) ([06283e1](https://www.github.com/google/js-green-licenses/commit/06283e10c44306f88cdb382ac9d593f4a48c0b7d))
+
 ## [1.1.0](https://www.github.com/google/js-green-licenses/compare/v1.0.0...v1.1.0) (2019-06-05)
 
 
