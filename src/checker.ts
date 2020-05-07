@@ -38,6 +38,7 @@ const fsReadFile = promisify(fs.readFile);
 // Valid license IDs defined in https://spdx.org/licenses/ must be used whenever
 // possible. When adding new licenses, please consult the relevant documents.
 const DEFAULT_GREEN_LICENSES = [
+  '0BSD',
   'AFL-2.1',
   'AFL-3.0',
   'APSL-2.0',
