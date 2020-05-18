@@ -176,7 +176,7 @@ export class LicenseChecker extends EventEmitter {
     this.failedPackages.clear();
   }
 
-  private getLicense(pkgJson: PackageJson): string | null {
+  private getLicense(pkgJson: Partial<PackageJson>): string | null {
     // Some package.json files have incorrect license fields, and old packages
     // may have legacy licence field format. See
     // https://docs.npmjs.com/files/package.json#license for details. The code
@@ -311,7 +311,7 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private async checkPackageJson(
-    json: any,
+    json: Partial<PackageJson>,
     packageName: string | null,
     localDirectory: string | null,
     ...parents: string[]
@@ -320,7 +320,7 @@ export class LicenseChecker extends EventEmitter {
 
     const isWhitelisted = this.isPackageWhitelisted(packageName);
     if (isWhitelisted) {
-      json.version = semver.valid(json.version) ? json.version : '0.0.0'
+      json.version = semver.valid(json.version) ? json.version : '0.0.0';
     } else {
       ensurePackageJson(json);
     }
@@ -343,7 +343,7 @@ export class LicenseChecker extends EventEmitter {
       if (!this.isGreenLicense(license)) {
         this.emit('non-green-license', {
           packageName,
-          version: pkgVersion,
+          version: pkgVersion || 'undefined',
           licenseName: license,
           parentPackages: parents,
         });
