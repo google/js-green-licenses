@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+### [2.0.1](https://www.github.com/google/js-green-licenses/compare/v2.0.0...v2.0.1) (2020-05-18)
+
+
+### Bug Fixes
+
+* Added support for the UNLICENSED NPM magic value (fixes [#113](https://www.github.com/google/js-green-licenses/issues/113)) ([#134](https://www.github.com/google/js-green-licenses/issues/134)) ([c7966eb](https://www.github.com/google/js-green-licenses/commit/c7966eb39a95c3376f3845f7797bb3d72f2c5904))
+
 ## [2.0.0](https://www.github.com/google/js-green-licenses/compare/v1.1.0...v2.0.0) (2020-05-07)
 
 
