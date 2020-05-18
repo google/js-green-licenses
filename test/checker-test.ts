@@ -492,7 +492,7 @@ describe(__filename, () => {
     });
 
     const configJson = JSON.stringify({
-      packageWhitelist: ['hello']
+      packageWhitelist: ['hello'],
     });
     const pathToPrimary = path.join('path', 'to', 'primary');
     return withFixtures(
