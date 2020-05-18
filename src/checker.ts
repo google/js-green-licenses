@@ -196,6 +196,12 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private correctLicenseName(license: string): string | null {
+    // NPM specific value.
+    if (license === 'UNLICENSED' || license === 'UNLICENCED') {
+      console.warn(`Unlicensed package, specified license: ${license}`);
+      return 'UNLICENSED';
+    }
+
     const corrected = spdxCorrect(license);
     if (this.opts.verbose && corrected && corrected !== license) {
       console.warn(`Correcting ${license} to ${corrected}`);
