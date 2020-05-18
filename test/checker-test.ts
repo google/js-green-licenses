@@ -483,4 +483,45 @@ describe(__filename, () => {
       }
     );
   });
+
+  it('skips package.json checks if package is whitelisted', () => {
+    const primaryPackageJson = JSON.stringify({
+      name: 'hello',
+      version: '1.0.0',
+      licenses: ['invalid', 'values'],
+    });
+
+    const configJson = JSON.stringify({
+      packageWhitelist: ['hello']
+    });
+    const pathToPrimary = path.join('path', 'to', 'primary');
+    return withFixtures(
+      {
+        [pathToPrimary]: {
+          'package.json': primaryPackageJson,
+          'js-green-licenses.json': configJson,
+        },
+      },
+      async () => {
+        requestedPackages = [];
+        const nonGreenPackages: string[] = [];
+        const packageJsonPaths: string[] = [];
+        const checker = new LicenseChecker();
+        checker
+          .on('non-green-license', arg => {
+            nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+          })
+          .on('package.json', filePath => {
+            packageJsonPaths.push(filePath);
+          });
+        await checker.checkLocalDirectory(pathToPrimary);
+        console.log('requested packages: ', requestedPackages);
+        assert.deepStrictEqual(requestedPackages, []);
+        assert.deepStrictEqual(nonGreenPackages, []);
+        assert.deepStrictEqual(packageJsonPaths, [
+          path.join(pathToPrimary, 'package.json'),
+        ]);
+      }
+    );
+  });
 });
