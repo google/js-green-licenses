@@ -20,6 +20,7 @@ import * as path from 'path';
 import spdxCorrect from 'spdx-correct';
 import spdxSatisfies from 'spdx-satisfies';
 import {inspect, promisify} from 'util';
+import semver from 'semver';
 
 import * as config from './config';
 import {GitHubRepository} from './github';
@@ -310,28 +311,27 @@ export class LicenseChecker extends EventEmitter {
   }
 
   private async checkPackageJson(
-    json: {},
+    json: any,
     packageName: string | null,
     localDirectory: string | null,
     ...parents: string[]
   ): Promise<void> {
-    const pj: PackageJson =
-      packageName && this.isPackageWhitelisted(packageName)
-        ? {
-            name: packageName,
-            version: '0.0.0',
-            ...json,
-          }
-        : ensurePackageJson(json);
-    if (!packageName) {
-      packageName = pj.name;
+    packageName = (packageName || json.name || 'undefined') as string;
+
+    const isWhitelisted = this.isPackageWhitelisted(packageName);
+    if (isWhitelisted) {
+      json.version = semver.valid(json.version) ? json.version : '0.0.0'
+    } else {
+      ensurePackageJson(json);
     }
-    if (pj.name !== packageName) {
+
+    if (json.name !== packageName) {
       console.warn(
-        `Package name mismatch. Expected ${packageName}, but got ${pj.name}`
+        `Package name mismatch. Expected ${packageName}, but got ${json.name}`
       );
     }
-    const pkgVersion = pj.version;
+
+    const pkgVersion = json.version;
     const packageAndVersion = `${packageName}@${pkgVersion}`;
     if (this.processedPackages.has(packageAndVersion)) return;
     this.processedPackages.add(packageAndVersion);
@@ -339,7 +339,7 @@ export class LicenseChecker extends EventEmitter {
     if (this.isPackageWhitelisted(packageName)) {
       console.log(`${packageName} is whitelisted.`);
     } else {
-      const license = this.getLicense(pj);
+      const license = this.getLicense(json);
       if (!this.isGreenLicense(license)) {
         this.emit('non-green-license', {
           packageName,
@@ -351,14 +351,14 @@ export class LicenseChecker extends EventEmitter {
     }
 
     await this.checkLicensesForDeps(
-      pj.dependencies,
+      json.dependencies,
       localDirectory,
       ...parents,
       packageAndVersion
     );
     if (this.opts.dev) {
       await this.checkLicensesForDeps(
-        pj.devDependencies,
+        json.devDependencies,
         localDirectory,
         ...parents,
         packageAndVersion
