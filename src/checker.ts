@@ -309,7 +309,14 @@ export class LicenseChecker extends EventEmitter {
     localDirectory: string | null,
     ...parents: string[]
   ): Promise<void> {
-    const pj: PackageJson = ensurePackageJson(json);
+    const pj: PackageJson =
+      packageName && this.isPackageWhitelisted(packageName)
+        ? {
+            name: packageName,
+            version: '0.0.0',
+            ...json,
+          }
+        : ensurePackageJson(json);
     if (!packageName) {
       packageName = pj.name;
     }
