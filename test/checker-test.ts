@@ -446,4 +446,41 @@ describe(__filename, () => {
       }
     );
   });
+
+  it('treats UNLICENSED as non-green', () => {
+    const primaryPackageJson = JSON.stringify({
+      name: 'hello',
+      version: '1.0.0',
+      license: 'UNLICENSED',
+    });
+
+    const pathToPrimary = path.join('path', 'to', 'primary');
+    return withFixtures(
+      {
+        [pathToPrimary]: {
+          'package.json': primaryPackageJson,
+        },
+      },
+      async () => {
+        requestedPackages = [];
+        const nonGreenPackages: string[] = [];
+        const packageJsonPaths: string[] = [];
+        const checker = new LicenseChecker();
+        checker
+          .on('non-green-license', arg => {
+            nonGreenPackages.push(`${arg.packageName}@${arg.version}`);
+          })
+          .on('package.json', filePath => {
+            packageJsonPaths.push(filePath);
+          });
+        await checker.checkLocalDirectory(pathToPrimary);
+        console.log('requested packages: ', requestedPackages);
+        assert.deepStrictEqual(requestedPackages, []);
+        assert.deepStrictEqual(nonGreenPackages, ['hello@1.0.0']);
+        assert.deepStrictEqual(packageJsonPaths, [
+          path.join(pathToPrimary, 'package.json'),
+        ]);
+      }
+    );
+  });
 });
