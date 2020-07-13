@@ -1,6 +1,6 @@
 # JavaScript package.json License Checker
 
-[![NPM Version][npm-image]][npm-url]
+[![npm Version][npm-image]][npm-url]
 [![CI][actions-image]][actions-url]
 [![Dependency Status][david-image]][david-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
@@ -54,8 +54,8 @@ Optional arguments:
   --verbose             Verbose error outputs.
 ```
 
-This tool checks licenses for 1) an already published NPM package, 2) a local
-directory, or 3) a GitHub pull request. For checking an NPM package, you can
+This tool checks licenses for 1) an already published npm package, 2) a local
+directory, or 3) a GitHub pull request. For checking an npm package, you can
 just pass the package name (optionally together with the version) as the
 argument. To check a local directory, you should pass the `--local
 path/to/repo` argument. To check for a GitHub PR, you should pass the `--pr
@@ -123,7 +123,7 @@ const DEFAULT_GREEN_LICENSES = [
 ];
 ```
 
-You can also whitelist some NPM packages and they will be considered "green"
+You can also whitelist some npm packages and they will be considered "green"
 even when they have non-green licenses or no licenses. It's useful when
 `jsgl` is unable to verify the validness of a certain package's license for
 some reason. For example, when a package doesn't specify its license in its
@@ -158,7 +158,7 @@ The `greenLicenses` section is for the custom license list and the
 Note that comments are allowed in `js-green-licenses.json`.
 
 The configuration file must be located in the top-level directory of a
-repository for `--local` and `--pr`. When checking remote NPM packages,
+repository for `--local` and `--pr`. When checking remote npm packages,
 `jsgl` tries to locate the configuration file in the current local directory
 from which `jsgl` is invoked.
 
@@ -235,7 +235,7 @@ gulp.task('check_licenses', function() {
 
     This provides the functionality of the CLI when neither `--local` or
     `--pr` is passed. It retrieves and checks the `package.json` for the
-    remote NPM package and recursively checks its dependencies.
+    remote npm package and recursively checks its dependencies.
 
     This method reads in the configuration from the `js-green-licenses.json`
     file in the current directory of the Node.js process.
