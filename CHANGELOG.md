@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+## [2.1.0](https://www.github.com/google/js-green-licenses/compare/v2.0.1...v2.1.0) (2020-12-10)
+
+
+### Features
+
+* added skipping of package.json check if package is whitelisted (resolves [#118](https://www.github.com/google/js-green-licenses/issues/118)) ([#136](https://www.github.com/google/js-green-licenses/issues/136)) ([0d95d18](https://www.github.com/google/js-green-licenses/commit/0d95d18eb146bb8a003e741789729cf88d7e759c))
+
+
+### Bug Fixes
+
+* **deps:** update dependency gaxios to v4 ([#148](https://www.github.com/google/js-green-licenses/issues/148)) ([9b66f9c](https://www.github.com/google/js-green-licenses/commit/9b66f9cd1768c4a7f5dde454192a9dc0f0d10c8f))
+
 ### [2.0.1](https://www.github.com/google/js-green-licenses/compare/v2.0.0...v2.0.1) (2020-05-18)
 
 
