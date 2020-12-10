@@ -38,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "argparse": "^1.0.10",
+    "argparse": "^2.0.0",
     "gaxios": "^4.0.0",
     "npm-package-arg": "^8.0.0",
     "package-json": "^6.0.0",
@@ -48,7 +48,7 @@
     "strip-json-comments": "^3.0.0"
   },
   "devDependencies": {
-    "@types/argparse": "^1.0.33",
+    "@types/argparse": "^2.0.0",
     "@types/mocha": "^8.0.0",
     "@types/nock": "^10.0.0",
     "@types/node": "^10.0.1",
