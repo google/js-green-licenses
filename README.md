@@ -123,12 +123,12 @@ const DEFAULT_GREEN_LICENSES = [
 ];
 ```
 
-You can also whitelist some npm packages and they will be considered "green"
+You can also allowlist some npm packages and they will be considered "green"
 even when they have non-green licenses or no licenses. It's useful when
 `jsgl` is unable to verify the validness of a certain package's license for
 some reason. For example, when a package doesn't specify its license in its
 `package.json` but has a separate `LICENSE` file, `jsgl` can't verify that.
-You can whitelist that package to make `jsgl` not complain about that
+You can allowlist that package to make `jsgl` not complain about that
 package.
 
 A typical configuration file looks like this:
@@ -141,7 +141,7 @@ A typical configuration file looks like this:
     "BSD-3-Clause",
     ...
   ],
-  "packageWhitelist": [
+  "packageAllowlist": [
     /* packages considered ok */
     "foo",
     "bar",  // inline comment
@@ -153,7 +153,7 @@ A typical configuration file looks like this:
 ```
 
 The `greenLicenses` section is for the custom license list and the
-`packageWhitelist` section is for the package whitelist.
+`packageAllowlist` section is for the package allowlist.
 
 Note that comments are allowed in `js-green-licenses.json`.
 
@@ -310,7 +310,7 @@ A `LicenseChecker` object emits following events during its processing.
 
 [actions-image]: https://github.com/google/js-green-licenses/workflows/ci/badge.svg
 [actions-url]: https://github.com/google/js-green-licenses/actions
-[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/master/graph/badge.svg
+[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/google/js-green-licenses
 [david-image]: https://david-dm.org/google/js-green-licenses.svg
 [david-url]: https://david-dm.org/google/js-green-licenses
