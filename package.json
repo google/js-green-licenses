@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "argparse": "^1.0.10",
-    "gaxios": "^3.0.0",
+    "gaxios": "^4.0.0",
     "npm-package-arg": "^8.0.0",
     "package-json": "^6.0.0",
     "semver": "^7.3.2",
@@ -59,13 +59,13 @@
     "@types/spdx-satisfies": "^0.1.0",
     "@types/strip-json-comments": "0.0.30",
     "c8": "^7.0.0",
-    "gts": "^2.0.0",
+    "gts": "^3.0.0",
     "inline-fixtures": "^1.1.0",
     "make-dir": "^3.0.0",
     "mocha": "^8.0.0",
     "mock-fs": "^4.4.2",
     "nock": "^13.0.0",
     "proxyquire": "^2.0.1",
-    "typescript": "~4.0.0"
+    "typescript": "~4.1.0"
   }
 }
