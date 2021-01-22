@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+## [3.0.0](https://www.github.com/google/js-green-licenses/compare/v2.0.1...v3.0.0) (2021-01-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* The `packageWhitelist` field has been renamed to `packageAllowlist`.
+
+### Features
+
+* added skipping of package.json check if package is whitelisted (resolves [#118](https://www.github.com/google/js-green-licenses/issues/118)) ([#136](https://www.github.com/google/js-green-licenses/issues/136)) ([0d95d18](https://www.github.com/google/js-green-licenses/commit/0d95d18eb146bb8a003e741789729cf88d7e759c))
+* use allowlist for allowed licenses ([#153](https://www.github.com/google/js-green-licenses/issues/153)) ([d24827f](https://www.github.com/google/js-green-licenses/commit/d24827fa25d66020f876412f706a9dfbd8b56a98))
+
+
+### Bug Fixes
+
+* **deps:** update dependency gaxios to v4 ([#148](https://www.github.com/google/js-green-licenses/issues/148)) ([9b66f9c](https://www.github.com/google/js-green-licenses/commit/9b66f9cd1768c4a7f5dde454192a9dc0f0d10c8f))
+* **deps:** use meow for argument parsing ([#156](https://www.github.com/google/js-green-licenses/issues/156)) ([ae07bc8](https://www.github.com/google/js-green-licenses/commit/ae07bc81f21a7be753424c4dfc3fed4c6ee69060))
+
 ### [2.0.1](https://www.github.com/google/js-green-licenses/compare/v2.0.0...v2.0.1) (2020-05-18)
 
 
