@@ -244,7 +244,7 @@ describe(__filename, () => {
     );
   });
 
-  it('package whitelist should be respected (local repo)', () => {
+  it('package allowlist should be respected (local repo)', () => {
     const packageJson = JSON.stringify({
       name: 'hello',
       version: '1.0.0',
@@ -254,7 +254,7 @@ describe(__filename, () => {
       },
     });
     const configJson = JSON.stringify({
-      packageWhitelist: ['bar'],
+      packageAllowlist: ['bar'],
     });
     const pathToDir = path.join('path', 'to', 'dir');
     return withFixtures(
@@ -484,7 +484,7 @@ describe(__filename, () => {
     );
   });
 
-  it('skips package.json checks if package is whitelisted', () => {
+  it('skips package.json checks if package is allow listed', () => {
     const primaryPackageJson = JSON.stringify({
       name: 'hello',
       version: '1.0.0',
@@ -492,7 +492,7 @@ describe(__filename, () => {
     });
 
     const configJson = JSON.stringify({
-      packageWhitelist: ['hello'],
+      packageAllowlist: ['hello'],
     });
     const pathToPrimary = path.join('path', 'to', 'primary');
     return withFixtures(

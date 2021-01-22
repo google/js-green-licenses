@@ -22,7 +22,7 @@ describe(__filename, () => {
   it('read correct contents from local config file', async () => {
     const configContent = JSON.stringify({
       greenLicenses: ['FOO', 'BAR'],
-      packageWhitelist: ['a-package', 'another-package'],
+      packageAllowlist: ['a-package', 'another-package'],
     });
 
     return withFixtures(
@@ -31,7 +31,7 @@ describe(__filename, () => {
         const cfg = await config.getLocalConfig('repo/directory');
         assert.ok(cfg);
         assert.deepStrictEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
-        assert.deepStrictEqual(cfg!.packageWhitelist, [
+        assert.deepStrictEqual(cfg!.packageAllowlist, [
           'a-package',
           'another-package',
         ]);
@@ -48,7 +48,7 @@ describe(__filename, () => {
       async getFileContent(): Promise<string | null> {
         return JSON.stringify({
           greenLicenses: ['BAR', 'BAZ'],
-          packageWhitelist: ['package-1', 'package-2'],
+          packageAllowlist: ['package-1', 'package-2'],
         });
       }
     }
@@ -58,7 +58,7 @@ describe(__filename, () => {
     );
     assert.ok(cfg);
     assert.deepStrictEqual(cfg!.greenLicenses, ['BAR', 'BAZ']);
-    assert.deepStrictEqual(cfg!.packageWhitelist, ['package-1', 'package-2']);
+    assert.deepStrictEqual(cfg!.packageAllowlist, ['package-1', 'package-2']);
   });
 
   it('no config file is ok (local)', async () => {
@@ -88,7 +88,7 @@ describe(__filename, () => {
   it('error for invalid config file (local)', async () => {
     const configContent = JSON.stringify({
       // must be an array of strings.
-      packageWhitelist: [42, 43],
+      packageAllowlist: [42, 43],
     });
     return withFixtures(
       {
@@ -157,7 +157,7 @@ describe(__filename, () => {
         "BAR"
       ],
       /* another form of comment */
-      "packageWhitelist": [
+      "packageAllowlist": [
         "foo",  // inline comment
         "bar"
       ]
@@ -172,7 +172,7 @@ describe(__filename, () => {
         const cfg = await config.getLocalConfig('repo/directory');
         assert.ok(cfg);
         assert.deepStrictEqual(cfg!.greenLicenses, ['FOO', 'BAR']);
-        assert.deepStrictEqual(cfg!.packageWhitelist, ['foo', 'bar']);
+        assert.deepStrictEqual(cfg!.packageAllowlist, ['foo', 'bar']);
       }
     );
   });

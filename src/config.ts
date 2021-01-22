@@ -27,7 +27,7 @@ export interface Config {
   // Licenses specified in this list are considered green.
   greenLicenses?: string[];
   // Packages specified in this list are considered green.
-  packageWhitelist?: string[];
+  packageAllowlist?: string[];
 }
 
 function isConfig(obj: {}): obj is Config {
@@ -39,7 +39,7 @@ function isConfig(obj: {}): obj is Config {
   };
   return (
     isStringArray(config.greenLicenses) &&
-    isStringArray(config.packageWhitelist)
+    isStringArray(config.packageAllowlist)
   );
 }
 
