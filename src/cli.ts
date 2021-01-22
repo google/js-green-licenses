@@ -14,61 +14,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ArgumentParser} from 'argparse';
+import meow from 'meow';
 import {LicenseChecker} from './checker';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const {version} = require('../../package.json');
+const cli = meow(
+  `
+	Usage
+	  $ jsgl [-h] [-v] [--local <directory>] [--pr <github PR>] [--dev] [--verbose] [<package or package@version>]
 
-const argParser = new ArgumentParser({
-  version,
-  addHelp: true,
-  description: 'License checker for npm modules',
-});
-argParser.addArgument(['package'], {
-  help:
-    'Package name to check license for. ' +
-    'Can include version spec after @. E.g. foo@^1.2.3. Otherwise latest.',
-  metavar: '<package or package@version>',
-  type: 'string',
-  nargs: '?',
-});
-argParser.addArgument(['--local', '-l'], {
-  help: 'Check a local directory instead of public npm.',
-  metavar: '<directory>',
-  type: 'string',
-  nargs: 1,
-});
-argParser.addArgument(['--pr'], {
-  help: 'Check a github pull request. Must be <owner>/<repo>/pull/<id>',
-  metavar: '<github PR>',
-  type: 'string',
-  nargs: 1,
-});
-argParser.addArgument(['--dev'], {
-  help: 'Also check devDependencies.',
-  nargs: 0,
-});
-argParser.addArgument(['--verbose'], {
-  help: 'Verbose error outputs.',
-  nargs: 0,
-});
-const args = argParser.parseArgs();
+  Positional arguments:
+    <package or package@version>
+                      Package name to check license for. Can include
+                      version spec after @. E.g. foo@^1.2.3. Otherwise
+                      latest.
+
+	Options
+    --help            Show this help message and exit.
+    --local <directory>, -l <directory>
+                      Check a local directory instead of public npm.
+    --version, -v     Show program's version number and exit.
+    --pr <pr_number>  Check a github pull request. Must be <owner>/<repo>/pull/<id>
+    --dev             Also check devDependencies.
+    --verbose         Verbose error outputs.
+`,
+  {
+    flags: {
+      local: {
+        type: 'string',
+        alias: 'l',
+      },
+      pr: {
+        type: 'string',
+      },
+      dev: {
+        type: 'boolean',
+      },
+      verbose: {
+        type: 'boolean',
+      },
+    },
+  }
+);
 
 async function main(): Promise<void> {
   const checker = new LicenseChecker({
-    dev: !!args.dev,
-    verbose: !!args.verbose,
+    dev: !!cli.flags.dev,
+    verbose: !!cli.flags.verbose,
   });
   checker.setDefaultHandlers({setExitCode: true});
-  if (args.local) {
-    await checker.checkLocalDirectory(args.local[0]);
-  } else if (args.pr) {
-    const {repo, prId} = checker.prPathToGitHubRepoAndId(args.pr[0]);
+  if (cli.flags.local) {
+    await checker.checkLocalDirectory(cli.flags.local);
+  } else if (cli.flags.pr) {
+    console.log(cli.flags.pr);
+    const {repo, prId} = checker.prPathToGitHubRepoAndId(cli.flags.pr);
     const {mergeCommitSha} = await repo.getPRCommits(prId);
     await checker.checkGitHubPR(repo, mergeCommitSha);
-  } else if (args.package) {
-    await checker.checkRemotePackage(args.package);
+  } else if (cli.input?.length) {
+    await checker.checkRemotePackage(cli.input![0]);
   } else {
     throw new Error('Package name, --local, or --pr must be given');
   }
