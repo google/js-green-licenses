@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+### [3.0.1](https://www.github.com/google/js-green-licenses/compare/v3.0.0...v3.0.1) (2021-04-05)
+
+
+### Bug Fixes
+
+* handle incorrect licenses fields ([#146](https://www.github.com/google/js-green-licenses/issues/146)) ([209847f](https://www.github.com/google/js-green-licenses/commit/209847fa96d3f8676cfb292ef879a7e58e4cdecd))
+
 ## [3.0.0](https://www.github.com/google/js-green-licenses/compare/v2.0.1...v3.0.0) (2021-01-22)
 
 
