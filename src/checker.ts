@@ -188,11 +188,15 @@ export class LicenseChecker extends EventEmitter {
       }
       return null;
     }
-    if (typeof license === 'string') return license;
+    if (typeof license === 'string') {
+      return license;
+    }
     if (Array.isArray(license)) {
-      if (license.length === 0) return null;
+      if (license.length === 0) {
+        return null;
+      }
       const types = license.map(x => x.type).filter(x => !!x);
-      return types.length === 1 ? types[0] : `${types.join(' / ')}`;
+      return types.length === 1 ? types[0] : `(${types.join(' OR ')})`;
     }
     return license.type || null;
   }
