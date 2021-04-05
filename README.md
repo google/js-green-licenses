@@ -111,24 +111,24 @@ use that custom list instead of its default list.
 The default green license list is:
 ```javascript
 const DEFAULT_GREEN_LICENSES = [
-  'AFL-2.1',      'AFL-3.0',      'APSL-2.0',     'Apache-1.1',   'Apache-2.0',
-  'Artistic-1.0', 'Artistic-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'BSL-1.0',
-  'CC-BY-1.0',    'CC-BY-2.0',    'CC-BY-2.5',    'CC-BY-3.0',    'CC-BY-4.0',
-  'CC0-1.0',      'CDDL-1.0',     'CDDL-1.1',     'CPL-1.0',      'EPL-1.0',
-  'FTL',          'IPL-1.0',      'ISC',          'LGPL-2.0',     'LGPL-2.1',
-  'LGPL-3.0',     'LPL-1.02',     'MIT',          'MPL-1.0',      'MPL-1.1',
-  'MPL-2.0',      'MS-PL',        'NCSA',         'OpenSSL',      'PHP-3.0',
-  'Ruby',         'Unlicense',    'W3C',          'Xnet',         'ZPL-2.0',
-  'Zend-2.0',     'Zlib',         'libtiff',
+  '0BSD',         'AFL-2.1',      'AFL-3.0',      'APSL-2.0',     'Apache-1.1',   
+  'Apache-2.0',   'Artistic-1.0', 'Artistic-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 
+  'BSL-1.0',      'CC-BY-1.0',    'CC-BY-2.0',    'CC-BY-2.5',    'CC-BY-3.0',    
+  'CC-BY-4.0',    'CC0-1.0',      'CDDL-1.0',     'CDDL-1.1',     'CPL-1.0',      
+  'EPL-1.0',      'FTL',          'IPL-1.0',      'ISC',          'LGPL-2.0',     
+  'LGPL-2.1',     'LGPL-3.0',     'LPL-1.02',     'MIT',          'MPL-1.0',      
+  'MPL-1.1',      'MPL-2.0',      'MS-PL',        'NCSA',         'OpenSSL',      
+  'PHP-3.0',      'Ruby',         'Unlicense',    'W3C',          'Xnet',         
+  'ZPL-2.0',      'Zend-2.0',     'Zlib',         'libtiff',
 ];
 ```
 
-You can also whitelist some npm packages and they will be considered "green"
+You can also allowlist some npm packages and they will be considered "green"
 even when they have non-green licenses or no licenses. It's useful when
 `jsgl` is unable to verify the validness of a certain package's license for
 some reason. For example, when a package doesn't specify its license in its
 `package.json` but has a separate `LICENSE` file, `jsgl` can't verify that.
-You can whitelist that package to make `jsgl` not complain about that
+You can allowlist that package to make `jsgl` not complain about that
 package.
 
 A typical configuration file looks like this:
@@ -141,7 +141,7 @@ A typical configuration file looks like this:
     "BSD-3-Clause",
     ...
   ],
-  "packageWhitelist": [
+  "packageAllowlist": [
     /* packages considered ok */
     "foo",
     "bar",  // inline comment
@@ -153,7 +153,7 @@ A typical configuration file looks like this:
 ```
 
 The `greenLicenses` section is for the custom license list and the
-`packageWhitelist` section is for the package whitelist.
+`packageAllowlist` section is for the package allowlist.
 
 Note that comments are allowed in `js-green-licenses.json`.
 
@@ -310,7 +310,7 @@ A `LicenseChecker` object emits following events during its processing.
 
 [actions-image]: https://github.com/google/js-green-licenses/workflows/ci/badge.svg
 [actions-url]: https://github.com/google/js-green-licenses/actions
-[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/master/graph/badge.svg
+[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/google/js-green-licenses
 [david-image]: https://david-dm.org/google/js-green-licenses.svg
 [david-url]: https://david-dm.org/google/js-green-licenses

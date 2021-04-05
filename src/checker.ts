@@ -126,7 +126,7 @@ export class LicenseChecker extends EventEmitter {
   // https://spdx.org/licenses/.
   private greenLicenseExpr = '';
   // List of license names that are not SPDX-conforming IDs but are allowed.
-  private whitelistedLicenses: string[] = [];
+  private allowlistedLicenses: string[] = [];
 
   constructor({dev = false, verbose = false}: LicenseCheckerOptions = {}) {
     super();
@@ -170,7 +170,7 @@ export class LicenseChecker extends EventEmitter {
       }
     }
     this.greenLicenseExpr = `(${validGreenLicenses.join(' OR ')})`;
-    this.whitelistedLicenses = invalidGreenLicenses;
+    this.allowlistedLicenses = invalidGreenLicenses;
 
     this.processedPackages.clear();
     this.failedPackages.clear();
@@ -211,10 +211,10 @@ export class LicenseChecker extends EventEmitter {
     return corrected;
   }
 
-  private isPackageWhitelisted(packageName: string): boolean {
+  private isPackageAllowlisted(packageName: string): boolean {
     return (
-      !!this.config.packageWhitelist &&
-      this.config.packageWhitelist.some(p => p === packageName)
+      !!this.config.packageAllowlist &&
+      this.config.packageAllowlist.some(p => p === packageName)
     );
   }
 
@@ -222,9 +222,9 @@ export class LicenseChecker extends EventEmitter {
     if (!license) return false;
 
     const correctedName = this.correctLicenseName(license);
-    // `license` is not a valid or correctable SPDX id. Check the whitelist.
+    // `license` is not a valid or correctable SPDX id. Check the allowlist.
     if (!correctedName) {
-      return this.whitelistedLicenses.some(l => l === license);
+      return this.allowlistedLicenses.some(l => l === license);
     }
 
     try {
@@ -319,8 +319,8 @@ export class LicenseChecker extends EventEmitter {
   ): Promise<void> {
     packageName = (packageName || json.name || 'undefined') as string;
 
-    const isWhitelisted = this.isPackageWhitelisted(packageName);
-    if (isWhitelisted) {
+    const isAllowlisted = this.isPackageAllowlisted(packageName);
+    if (isAllowlisted) {
       json.version = semver.valid(json.version) ? json.version : '0.0.0';
     } else {
       ensurePackageJson(json);
@@ -337,8 +337,8 @@ export class LicenseChecker extends EventEmitter {
     if (this.processedPackages.has(packageAndVersion)) return;
     this.processedPackages.add(packageAndVersion);
 
-    if (this.isPackageWhitelisted(packageName)) {
-      console.log(`${packageName} is whitelisted.`);
+    if (this.isPackageAllowlisted(packageName)) {
+      console.log(`${packageName} is allowlisted.`);
     } else {
       const license = this.getLicense(json);
       if (!this.isGreenLicense(license)) {
