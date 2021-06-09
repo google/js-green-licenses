@@ -61,7 +61,7 @@
     "inline-fixtures": "^1.1.0",
     "make-dir": "^3.0.0",
     "mocha": "^8.2.1",
-    "mock-fs": "^4.4.2",
+    "mock-fs": "^5.0.0",
     "nock": "^13.0.0",
     "proxyquire": "^2.0.1",
     "typescript": "~4.3.0"
