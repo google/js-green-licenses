@@ -45,7 +45,7 @@
     "semver": "^7.3.2",
     "spdx-correct": "^3.0.0",
     "spdx-satisfies": "^5.0.0",
-    "strip-json-comments": "^3.0.0"
+    "strip-json-comments": "^4.0.0"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
