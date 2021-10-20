@@ -233,7 +233,8 @@ export class LicenseChecker extends EventEmitter {
 
     try {
       return spdxSatisfies(correctedName, this.greenLicenseExpr);
-    } catch (err) {
+    } catch (e) {
+      const err = e as Error;
       // Most likely because license is not recognized. Just return false.
       if (this.opts.verbose) {
         console.error(err.message || err);
@@ -292,7 +293,8 @@ export class LicenseChecker extends EventEmitter {
         localDirectory,
         ...parents
       );
-    } catch (err) {
+    } catch (e) {
+      const err = e as Error;
       this.failedPackages.add(spec);
       this.emit('error', {
         err,
@@ -380,9 +382,10 @@ export class LicenseChecker extends EventEmitter {
     try {
       json = JSON.parse(content);
       await this.checkPackageJson(json, json.name, localDirectory);
-    } catch (err) {
-      const packageName = (json && json.name) || '(unknown package)';
-      const versionSpec = (json && json.version) || '(unknown version)';
+    } catch (e) {
+      const err = e as Error;
+      const packageName = json?.name || '(unknown package)';
+      const versionSpec = json?.version || '(unknown version)';
       this.emit('error', {
         err,
         packageName,
@@ -461,9 +464,10 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
-  prPathToGitHubRepoAndId(
-    prPath: string
-  ): {repo: GitHubRepository; prId: number} {
+  prPathToGitHubRepoAndId(prPath: string): {
+    repo: GitHubRepository;
+    prId: number;
+  } {
     const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
     const matched = regexp.exec(prPath);
     if (!matched) {

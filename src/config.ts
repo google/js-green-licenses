@@ -63,7 +63,8 @@ export async function getLocalConfig(
       'utf8'
     );
     return ensureConfig(parseJson(content));
-  } catch (err) {
+  } catch (e) {
+    const err = e as Error & {code: string};
     if (err.code !== 'ENOENT') {
       console.error(
         '[js-green-licenses] Error while reading config file:',
