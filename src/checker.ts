@@ -464,9 +464,10 @@ export class LicenseChecker extends EventEmitter {
   }
 
   /** @param prPath Must be in a form of <owner>/<repo>/pull/<id>. */
-  prPathToGitHubRepoAndId(
-    prPath: string
-  ): {repo: GitHubRepository; prId: number} {
+  prPathToGitHubRepoAndId(prPath: string): {
+    repo: GitHubRepository;
+    prId: number;
+  } {
     const regexp = /^([^/]+)\/([^/]+)\/pull\/(\d+)$/;
     const matched = regexp.exec(prPath);
     if (!matched) {
