@@ -307,6 +307,7 @@ A `LicenseChecker` object emits following events during its processing.
     }
     ```
 
+
 [actions-image]: https://github.com/google/js-green-licenses/workflows/ci/badge.svg
 [actions-url]: https://github.com/google/js-green-licenses/actions
 [codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/main/graph/badge.svg
