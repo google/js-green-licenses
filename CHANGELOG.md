@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/js-green-licenses?activeTab=versions
 
+## [4.0.0](https://github.com/google/js-green-licenses/compare/v3.0.1...v4.0.0) (2023-01-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop support for node.js 10.x ([#176](https://github.com/google/js-green-licenses/issues/176))
+
+### Bug Fixes
+
+* **deps:** update dependency gaxios to v5 ([#195](https://github.com/google/js-green-licenses/issues/195)) ([876307f](https://github.com/google/js-green-licenses/commit/876307f4c9fd70eebb56f32f1f19a3ae2500b462))
+* **deps:** update dependency package-json to v7 ([#172](https://github.com/google/js-green-licenses/issues/172)) ([cb2900e](https://github.com/google/js-green-licenses/commit/cb2900e8dd9040ba8fc4f694b407164c2f7d827b))
+* **deps:** upgrade to typescript 4.4.4 ([#180](https://github.com/google/js-green-licenses/issues/180)) ([da3fed5](https://github.com/google/js-green-licenses/commit/da3fed520287b6ca8e82426f8d95811baf876e64))
+
+
+### Build System
+
+* drop support for node.js 10.x ([#176](https://github.com/google/js-green-licenses/issues/176)) ([786b01a](https://github.com/google/js-green-licenses/commit/786b01a8fecb08ce275c853b34cb946a9fa0f3cd))
+
 ## [4.0.0](https://www.github.com/google/js-green-licenses/compare/v3.0.1...v4.0.0) (2021-10-20)
 
 
