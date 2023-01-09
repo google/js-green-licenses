@@ -4,7 +4,6 @@
 [![CI][actions-image]][actions-url]
 [![Dependency Status][david-image]][david-url]
 [![Known Vulnerabilities][snyk-image]][snyk-url]
-[![codecov][codecov-image]][codecov-url]
 [![Code Style: Google][gts-image]][gts-url]
 
 **This is not an official Google product.**
@@ -310,7 +309,6 @@ A `LicenseChecker` object emits following events during its processing.
 
 [actions-image]: https://github.com/google/js-green-licenses/workflows/ci/badge.svg
 [actions-url]: https://github.com/google/js-green-licenses/actions
-[codecov-image]: https://codecov.io/gh/google/js-green-licenses/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/google/js-green-licenses
 [david-image]: https://david-dm.org/google/js-green-licenses.svg
 [david-url]: https://david-dm.org/google/js-green-licenses
