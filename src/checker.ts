@@ -347,6 +347,9 @@ export class LicenseChecker extends EventEmitter {
       console.log(`${packageName} is allowlisted.`);
     } else {
       const license = this.getLicense(json);
+      if (this.opts.verbose) {
+        console.log(`${packageAndVersion},${license}`);
+      }
       if (!this.isGreenLicense(license)) {
         this.emit('non-green-license', {
           packageName,
