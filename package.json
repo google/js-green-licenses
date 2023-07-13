@@ -38,7 +38,7 @@
     ]
   },
   "dependencies": {
-    "gaxios": "^5.0.0",
+    "gaxios": "^6.0.0",
     "meow": "^9.0.0",
     "npm-package-arg": "^8.0.0",
     "package-json": "^7.0.0",
