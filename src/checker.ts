@@ -277,7 +277,7 @@ export class LicenseChecker extends EventEmitter {
     if (this.failedPackages.has(spec)) return;
 
     // remove tilde/caret to check for an exact version, ^0.5.0-rc.0 becomes 0.5.0-rc.0
-    const version = versionSpec.replace(/^[^~]/, '');
+    const version = versionSpec.replace(/^[~^]/, '');
     // if the dependency is a local package then skip verification at this step. will be checked independently
     if (this.localPackages.has(`${packageName}@${version}`)) return;
 
